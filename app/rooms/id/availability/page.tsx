@@ -1,78 +1,87 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams, useParams } from "next/navigation";
 
-interface Slot {
+type Slot = {
   start: string;
   end: string;
-}
+};
 
-export default function AvailabilityPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const roomId = params.id;
+export default function RoomAvailabilityPage() {
+  const params = useParams();
+  const searchParams = useSearchParams();
 
-  const [date, setDate] = useState<string>("");
+  const roomId = params.id as string;
+  const date = searchParams.get("date") ?? "";
+
   const [slots, setSlots] = useState<Slot[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // Verfügbarkeit laden
+  // 🔹 Daten vom Backend laden
   async function loadAvailability(selectedDate: string) {
-    setLoading(true);
+    try {
+      setLoading(true);
+      setError("");
 
-    const res = await fetch(
-      `http://localhost:4000/rooms/${roomId}/availability?date=${selectedDate}`
-    );
+      const res = await fetch(
+        `http://localhost:4000/rooms/${roomId}/availability?date=${selectedDate}`
+      );
 
-    const data = await res.json();
+      if (!res.ok) {
+        throw new Error("Serverfehler");
+      }
 
-    setSlots(data.free ?? []);
-    setLoading(false);
+      const data = await res.json();
+      setSlots(data.free ?? []);
+    } catch (err) {
+      setError("Fehler beim Laden der Verfügbarkeit");
+    } finally {
+      setLoading(false);
+    }
   }
 
+  // 🔹 Effekt ohne ESLint-Warnung
   useEffect(() => {
     if (!date) return;
 
     async function fetchData() {
-        await loadAvailability(date);
+      await loadAvailability(date);
     }
 
     fetchData();
   }, [date]);
 
-
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Verfügbarkeit prüfen</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        Verfügbarkeit am {date}
+      </h1>
 
-      {/* Datumsauswahl */}
-      <input
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        className="border p-2 rounded mb-6"
-      />
-
-      {/* Ladeanzeige */}
-      {loading && <p>🔄 Lädt...</p>}
-
-      {/* Keine Slots */}
-      {!loading && date && slots.length === 0 && (
-        <p className="text-red-600">❌ Keine freien Zeiten an diesem Tag.</p>
+      {!date && (
+        <p className="text-red-600">❗ Bitte ?date=YYYY-MM-DD in der URL angeben.</p>
       )}
 
-      {/* Slots anzeigen */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-        {slots.map((slot, i) => (
+      {loading && <p>⏳ Laden…</p>}
+      {error && <p className="text-red-600">{error}</p>}
+
+      {/* Liste der freien Slots */}
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {slots.map((slot) => (
           <div
-            key={i}
-            className="bg-white border shadow p-4 rounded text-gray-700"
+            key={slot.start}
+            className="p-4 border rounded bg-white shadow hover:bg-blue-50 transition"
           >
-            ⏰ {slot.start} — {slot.end}
+            <p className="font-semibold">
+              🕒 {slot.start} – {slot.end}
+            </p>
           </div>
         ))}
+
+        {!loading && slots.length === 0 && (
+          <p className="text-gray-600">Keine freien Zeiten mehr.</p>
+        )}
       </div>
     </div>
   );
