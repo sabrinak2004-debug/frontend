@@ -2,18 +2,24 @@
 
 import { useState } from "react";
 
-export default function AvailabilityPage({ params }: { params: { id: string } }) {
+export default function AvailabilityPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const id = params.id;
 
   const [date, setDate] = useState("");
-  const [availability, setAvailability] = useState<null | boolean>(null);
+  const [slots, setSlots] = useState<{ start: string; end: string }[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  async function checkAvailability() {
+  async function loadAvailability() {
     if (!date) return;
 
     setLoading(true);
-    setAvailability(null);
+    setError("");
+    setSlots([]);
 
     try {
       const res = await fetch(
@@ -21,15 +27,17 @@ export default function AvailabilityPage({ params }: { params: { id: string } })
       );
 
       if (!res.ok) {
-        setAvailability(null);
+        setError("Serverfehler");
+        setLoading(false);
         return;
       }
 
       const data = await res.json();
-      setAvailability(data.available);
 
-    } catch (error) {
-      console.error("Fehler beim Abrufen:", error);
+      // Backend liefert: { free: [...] }
+      setSlots(data.free ?? []);
+    } catch (_err) {
+      setError("Fehler beim Laden.");
     }
 
     setLoading(false);
@@ -39,6 +47,7 @@ export default function AvailabilityPage({ params }: { params: { id: string } })
     <div className="p-10">
       <h1 className="text-2xl font-bold mb-4">Verfügbarkeit prüfen</h1>
 
+      {/* Date Input */}
       <input
         type="date"
         value={date}
@@ -47,25 +56,35 @@ export default function AvailabilityPage({ params }: { params: { id: string } })
       />
 
       <button
-        onClick={checkAvailability}
+        onClick={loadAvailability}
         className="ml-3 bg-blue-600 text-white px-4 py-2 rounded"
       >
         Prüfen
       </button>
 
+      {/* Ausgabebereich */}
       <div className="mt-6">
-        {loading && <p>Wird geladen...</p>}
+        {loading && <p>⏳ Wird geladen...</p>}
+        {error && <p className="text-red-600">{error}</p>}
 
-        {availability === true && (
-          <p className="text-green-600 font-semibold">
-            ✔ Der Raum ist frei!
-          </p>
+        {!loading && slots.length === 0 && date && !error && (
+          <p className="text-red-600">❌ Keine freien Zeiten</p>
         )}
 
-        {availability === false && (
-          <p className="text-red-600 font-semibold">
-            ❌ Der Raum ist belegt.
-          </p>
+        {slots.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold mb-2">
+              Freie Zeitfenster:
+            </h2>
+
+            <ul className="list-disc ml-6">
+              {slots.map((slot, index) => (
+                <li key={index}>
+                  {slot.start} – {slot.end}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
     </div>
