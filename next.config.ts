@@ -1,13 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "kim.uni-hohenheim.de",
-      },
-    ],
+    domains: ["kim.uni-hohenheim.de"], // Domain deiner Raum-Bilder
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
