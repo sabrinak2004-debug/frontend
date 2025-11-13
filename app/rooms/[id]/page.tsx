@@ -1,10 +1,12 @@
-export default async function RoomDetailPage(props: {
-  params: Promise<{ id: string }>;
+export default async function RoomDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
 }) {
-  // params aus dem Promise holen
-  const { id } = await props.params;
+  // params aus Promise holen
+  const { id } = await params;
 
-  // Daten aus dem Backend laden
+  // Raum laden
   const res = await fetch(`http://localhost:4000/rooms/${id}`, {
     cache: "no-store",
   });
@@ -17,8 +19,8 @@ export default async function RoomDetailPage(props: {
 
   return (
     <div style={{ padding: "40px" }}>
-      <h1>{room.name}</h1>
-      <p>{room.description}</p>
+      <h1 className="text-2xl font-bold mb-4">{room.name}</h1>
+      <p className="mb-4">{room.description}</p>
 
       <p>
         <strong>Kapazität:</strong> {room.capacity}
@@ -31,6 +33,14 @@ export default async function RoomDetailPage(props: {
       <p>
         <strong>Ausstattung:</strong> {room.equipment}
       </p>
+
+      {/* ➤ HIER DER WICHTIGE BUTTON */}
+      <a
+        href={`/rooms/${id}/availability`}
+        className="mt-6 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
+        Verfügbarkeit prüfen →
+      </a>
     </div>
   );
 }
