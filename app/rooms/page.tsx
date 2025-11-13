@@ -1,45 +1,67 @@
+// Datei: frontend/app/rooms/page.tsx
+
+import React from "react";
+
+type Room = {
+  id: string;
+  name: string;
+  description: string;
+  capacity: number;
+  location: string;
+  features: string[];
+  photo_url: string | null;
+};
+
 export default async function RoomsPage() {
-  // Backend URL
+  // Backend-API abrufen
   const res = await fetch("http://localhost:4000/rooms", {
-    cache: "no-store", // immer frische Daten
+    cache: "no-store",
   });
 
-  const rooms = await res.json();
+  if (!res.ok) {
+    return <div>Fehler beim Laden der Räume.</div>;
+  }
+
+  const rooms: Room[] = await res.json();
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">📅 Alle Gruppenräume</h1>
+      <h1 className="text-3xl font-bold mb-6">Alle Räume</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {rooms.map((room) => (
+          <div key={room.id} className="bg-white shadow rounded p-4">
+            {room.photo_url && (
+              <img
+                src={room.photo_url}
+                alt={room.name}
+                className="w-full h-40 object-cover rounded mb-3"
+              />
+            )}
 
-        {rooms.map((room: any) => (
-          <div
-            key={room.id}
-            className="bg-white p-4 rounded shadow hover:shadow-md transition"
-          >
-            {/* Bild */}
-            <img
-              src={room.photo_url}
-              alt={room.name}
-              className="w-full h-40 object-cover rounded"
-            />
+            <h2 className="text-xl font-semibold">{room.name}</h2>
+            <p className="text-gray-600 text-sm">{room.description}</p>
 
-            <h2 className="text-lg font-semibold mt-3">{room.name}</h2>
+            <p className="mt-2">
+              <strong>Kapazität:</strong> {room.capacity} Personen
+            </p>
 
-            <p className="text-gray-600">{room.location}</p>
-            <p className="text-sm text-gray-500 mb-3">
-              Kapazität: {room.capacity} Personen
+            <p className="mt-1">
+              <strong>Ort:</strong> {room.location}
+            </p>
+
+            <p className="mt-1">
+              <strong>Ausstattung:</strong> {room.features.join(", ")}
             </p>
 
             <a
               href={`/rooms/${room.id}`}
-              className="text-blue-600 hover:underline"
+              className="inline-block mt-4 text-blue-600 hover:underline"
             >
-              → Details ansehen
+              Verfügbarkeit prüfen →
             </a>
           </div>
         ))}
-
       </div>
     </div>
   );
