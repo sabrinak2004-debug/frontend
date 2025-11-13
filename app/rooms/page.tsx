@@ -1,5 +1,5 @@
 // Datei: frontend/app/rooms/page.tsx
-
+import Image from "next/image";
 import React from "react";
 
 type Room = {
@@ -32,10 +32,12 @@ export default async function RoomsPage() {
         {rooms.map((room) => (
           <div key={room.id} className="bg-white shadow rounded p-4">
             {room.photo_url && (
-              <img
+              <Image
                 src={room.photo_url}
                 alt={room.name}
-                className="w-full h-40 object-cover rounded mb-3"
+                width={400}
+                height={200}
+                className="w-full h-40 object-cover rounded"
               />
             )}
 

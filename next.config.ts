@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    domains: ["kim.uni-hohenheim.de"], // Domain deiner Raum-Bilder
+  },
 };
 
 export default nextConfig;
