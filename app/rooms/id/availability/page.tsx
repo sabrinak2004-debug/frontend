@@ -32,16 +32,15 @@ export default function AvailabilityPage({
     setLoading(false);
   }
 
-  // Wenn Datum ausgewählt wurde → neu laden
- useEffect(() => {
-  if (!date) return;
+  useEffect(() => {
+    if (!date) return;
 
-  async function fetchData() {
-    await loadAvailability(date);
-  }
+    async function fetchData() {
+        await loadAvailability(date);
+    }
 
-  fetchData();
-}, [date]);
+    fetchData();
+  }, [date]);
 
 
   return (
