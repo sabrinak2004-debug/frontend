@@ -33,10 +33,9 @@ export default function AvailabilityPage({
       }
 
       const data = await res.json();
-
-      // Backend liefert: { free: [...] }
       setSlots(data.free ?? []);
-    } catch (_err) {
+
+    } catch {
       setError("Fehler beim Laden.");
     }
 
@@ -47,7 +46,6 @@ export default function AvailabilityPage({
     <div className="p-10">
       <h1 className="text-2xl font-bold mb-4">Verfügbarkeit prüfen</h1>
 
-      {/* Date Input */}
       <input
         type="date"
         value={date}
@@ -62,9 +60,9 @@ export default function AvailabilityPage({
         Prüfen
       </button>
 
-      {/* Ausgabebereich */}
       <div className="mt-6">
         {loading && <p>⏳ Wird geladen...</p>}
+
         {error && <p className="text-red-600">{error}</p>}
 
         {!loading && slots.length === 0 && date && !error && (
@@ -73,10 +71,7 @@ export default function AvailabilityPage({
 
         {slots.length > 0 && (
           <div>
-            <h2 className="text-lg font-semibold mb-2">
-              Freie Zeitfenster:
-            </h2>
-
+            <h2 className="text-lg font-semibold mb-2">Freie Zeitfenster:</h2>
             <ul className="list-disc ml-6">
               {slots.map((slot, index) => (
                 <li key={index}>
