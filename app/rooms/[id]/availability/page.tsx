@@ -5,9 +5,10 @@ import { useState } from "react";
 export default function AvailabilityPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const id = params.id;
+  // params korrekt auflösen (wie bei der Detailseite)
+  const [resolvedParams] = useState(async () => await params);
 
   const [date, setDate] = useState("");
   const [slots, setSlots] = useState<{ start: string; end: string }[]>([]);
@@ -15,6 +16,8 @@ export default function AvailabilityPage({
   const [error, setError] = useState("");
 
   async function loadAvailability() {
+    const { id } = await resolvedParams;
+
     if (!date) return;
 
     setLoading(true);
@@ -34,7 +37,6 @@ export default function AvailabilityPage({
 
       const data = await res.json();
       setSlots(data.free ?? []);
-
     } catch {
       setError("Fehler beim Laden.");
     }
@@ -62,7 +64,6 @@ export default function AvailabilityPage({
 
       <div className="mt-6">
         {loading && <p>⏳ Wird geladen...</p>}
-
         {error && <p className="text-red-600">{error}</p>}
 
         {!loading && slots.length === 0 && date && !error && (
