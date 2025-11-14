@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="de">
-      <body className="flex bg-gray-100 min-h-screen">
+      <body className="flex bg-gray-50 min-h-screen">
 
         {/* SIDEBAR */}
         <aside className="w-72 bg-white border-r px-6 py-8 flex flex-col justify-between shadow-sm">
