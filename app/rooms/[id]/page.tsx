@@ -3,44 +3,60 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-export default function RoomDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const id = params.id;
 type Room = {
   id: string;
   name: string;
-  description: number;
+  description: string;
   capacity: number;
   photo_url?: string;
   location?: string;
-  equipment?: string; 
+  equipment?: string;
 };
+
+export default function RoomDetailPage(props: { params: Promise<{ id: string }> }) {
+  const [id, setId] = useState<string | null>(null);
   const [room, setRoom] = useState<Room | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // ⬇️ params korrekt aus Promise extrahieren!
   useEffect(() => {
+    async function extractParams() {
+      const resolved = await props.params;
+      setId(resolved.id);
+    }
+    extractParams();
+  }, [props.params]);
+
+  // ⬇️ Raum laden, sobald id verfügbar ist
+  useEffect(() => {
+    if (!id) return;
+
     async function loadRoom() {
       setLoading(true);
+
       try {
-        const res = await fetch(`http://localhost:4000/rooms/${id}`);
+        const res = await fetch(`http://localhost:4000/rooms/${id}`, {
+          cache: "no-store",
+        });
+
         if (res.ok) {
-          const data = await res.json();
-          setRoom(data);
+          setRoom(await res.json());
+        } else {
+          setRoom(null);
         }
       } catch {
         setRoom(null);
       }
+
       setLoading(false);
     }
 
     loadRoom();
   }, [id]);
 
+  if (!id) return <div className="p-10">Lade Raumparameter...</div>;
   if (loading) return <div className="p-10">Lade Raum...</div>;
-  if (!room) return <div className="p-10">Fehler beim Laden des Raumes.</div>;
+  if (!room) return <div className="p-10">Fehler beim Laden.</div>;
 
   return (
     <div className="p-10">
