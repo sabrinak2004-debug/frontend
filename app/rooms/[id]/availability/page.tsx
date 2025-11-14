@@ -5,24 +5,23 @@ import { useState } from "react";
 export default function AvailabilityPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  // params korrekt auflösen (wie bei der Detailseite)
-  const [resolvedParams] = useState(async () => await params);
+  const id = params.id;
 
   const [date, setDate] = useState("");
   const [slots, setSlots] = useState<{ start: string; end: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [checked, setChecked] = useState(false); // 👈 Neu
 
   async function loadAvailability() {
-    const { id } = await resolvedParams;
-
     if (!date) return;
 
     setLoading(true);
     setError("");
     setSlots([]);
+    setChecked(false); // wird erst nach erfolgreichem Laden aktiv
 
     try {
       const res = await fetch(
@@ -32,6 +31,7 @@ export default function AvailabilityPage({
       if (!res.ok) {
         setError("Serverfehler");
         setLoading(false);
+        setChecked(true);
         return;
       }
 
@@ -42,6 +42,7 @@ export default function AvailabilityPage({
     }
 
     setLoading(false);
+    setChecked(true); // 👈 jetzt darf angezeigt werden, ob es freie Zeiten gibt
   }
 
   return (
@@ -51,7 +52,10 @@ export default function AvailabilityPage({
       <input
         type="date"
         value={date}
-        onChange={(e) => setDate(e.target.value)}
+        onChange={(e) => {
+          setDate(e.target.value);
+          setChecked(false); // Datum gewechselt → wieder neutraler Zustand
+        }}
         className="border px-3 py-2 rounded"
       />
 
@@ -64,9 +68,11 @@ export default function AvailabilityPage({
 
       <div className="mt-6">
         {loading && <p>⏳ Wird geladen...</p>}
+
         {error && <p className="text-red-600">{error}</p>}
 
-        {!loading && slots.length === 0 && date && !error && (
+        {/* ❗ Nur anzeigen, wenn wirklich geprüft wurde */}
+        {!loading && checked && slots.length === 0 && !error && (
           <p className="text-red-600">❌ Keine freien Zeiten</p>
         )}
 
