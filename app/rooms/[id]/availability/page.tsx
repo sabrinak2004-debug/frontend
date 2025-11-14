@@ -1,54 +1,54 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-type Slot = {
-  start: string;
-  end: string;
-};
-
-export default function AvailabilityPage(props: {
-  params: Promise<{ id: string }>;
+export default function AvailabilityPage({
+  params,
+}: {
+  params: { id: string };
 }) {
-  // ID zuerst aus params-Promise extrahieren
-  const [id, setId] = useState<string | null>(null);
+  const { id } = params;
 
-  // UI-State
   const [date, setDate] = useState("");
-  const [slots, setSlots] = useState<Slot[]>([]);
-  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
+  const [slots, setSlots] = useState<{ start: string; end: string }[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<null | {
+    start: string;
+    end: string;
+  }>(null);
   const [people, setPeople] = useState(1);
   const [purpose, setPurpose] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // 1️⃣ params korrekt entpacken
-  useEffect(() => {
-    async function resolveParams() {
-      const p = await props.params;
-      setId(p.id);
-    }
-    resolveParams();
-  }, [props.params]);
-
-  // 2️⃣ Verfügbarkeit laden
+  // MANUELLES LADEN
   async function loadAvailability() {
-    if (!id || !date) return;
+    if (!date) return;
 
-    const res = await fetch(
-      `http://localhost:4000/rooms/${id}/availability?date=${date}`
-    );
+    setLoading(true);
+    setSlots([]);
+    setMessage("");
 
-    const data = await res.json();
-    setSlots(data.free ?? []);
+    try {
+      const res = await fetch(
+        `http://localhost:4000/rooms/${id}/availability?date=${date}`
+      );
+
+      const data = await res.json();
+      setSlots(data.free ?? []);
+    } catch {
+      setMessage("Fehler beim Laden");
+    }
+
+    setLoading(false);
   }
 
-  // 3️⃣ Buchung speichern
+  // BUCHEN ------------------------------
   async function book() {
-    if (!id || !selectedSlot) return;
+    if (!selectedSlot) return;
 
     const payload = {
       roomId: id,
-      userId: "703dedca-b5bd-4494-85c7-cfa9576bb6c6", // später dynamisch
+      userId: "703dedca-b5bd-4494-85c7-cfa9576bb6c6",
       date,
       start: selectedSlot.start,
       end: selectedSlot.end,
@@ -66,9 +66,6 @@ export default function AvailabilityPage(props: {
     if (res.ok) setMessage("✔️ Buchung erfolgreich gespeichert");
     else setMessage("❌ Fehler: " + data.error);
   }
-
-  if (!id)
-    return <div className="p-10">Lade Raumparameter...</div>;
 
   return (
     <div className="p-10">
@@ -89,9 +86,13 @@ export default function AvailabilityPage(props: {
         Prüfen
       </button>
 
+      {loading && <p>⏳ Wird geladen...</p>}
+
       {/* ZEITSLOTS */}
       <div className="mt-6">
-        {slots.length === 0 && date && <p>Keine freien Zeiten</p>}
+        {!loading && slots.length === 0 && date && (
+          <p>Keine freien Zeiten</p>
+        )}
 
         {slots.length > 0 && (
           <ul>
@@ -113,7 +114,6 @@ export default function AvailabilityPage(props: {
         )}
       </div>
 
-      {/* BUCHUNGSFORMULAR */}
       {selectedSlot && (
         <div className="mt-6 p-4 border rounded w-80 bg-gray-50">
           <h2 className="text-lg font-semibold mb-2">Buchung</h2>
