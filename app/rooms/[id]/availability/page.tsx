@@ -1,27 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function AvailabilityPage({
-  params,
-}: {
-  params: { id: string };
+type Slot = {
+  start: string;
+  end: string;
+};
+
+export default function AvailabilityPage(props: {
+  params: Promise<{ id: string }>;
 }) {
-  const {id} = params;
+  // ID zuerst aus params-Promise extrahieren
+  const [id, setId] = useState<string | null>(null);
 
+  // UI-State
   const [date, setDate] = useState("");
-  const [slots, setSlots] = useState<{ start: string; end: string }[]>([]);
-  const [selectedSlot, setSelectedSlot] = useState<null | {
-    start: string;
-    end: string;
-  }>(null);
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [people, setPeople] = useState(1);
   const [purpose, setPurpose] = useState("");
   const [message, setMessage] = useState("");
 
+  // 1️⃣ params korrekt entpacken
+  useEffect(() => {
+    async function resolveParams() {
+      const p = await props.params;
+      setId(p.id);
+    }
+    resolveParams();
+  }, [props.params]);
+
+  // 2️⃣ Verfügbarkeit laden
   async function loadAvailability() {
-    if (!date) return;
-    setSlots([]);
+    if (!id || !date) return;
 
     const res = await fetch(
       `http://localhost:4000/rooms/${id}/availability?date=${date}`
@@ -31,9 +42,9 @@ export default function AvailabilityPage({
     setSlots(data.free ?? []);
   }
 
-  // BUCHEN ------------------------------
+  // 3️⃣ Buchung speichern
   async function book() {
-    if (!selectedSlot) return;
+    if (!id || !selectedSlot) return;
 
     const payload = {
       roomId: id,
@@ -55,6 +66,9 @@ export default function AvailabilityPage({
     if (res.ok) setMessage("✔️ Buchung erfolgreich gespeichert");
     else setMessage("❌ Fehler: " + data.error);
   }
+
+  if (!id)
+    return <div className="p-10">Lade Raumparameter...</div>;
 
   return (
     <div className="p-10">
@@ -99,6 +113,7 @@ export default function AvailabilityPage({
         )}
       </div>
 
+      {/* BUCHUNGSFORMULAR */}
       {selectedSlot && (
         <div className="mt-6 p-4 border rounded w-80 bg-gray-50">
           <h2 className="text-lg font-semibold mb-2">Buchung</h2>
