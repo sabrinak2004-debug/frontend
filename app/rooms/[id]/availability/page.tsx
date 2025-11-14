@@ -1,54 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function AvailabilityPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const { id } = params;
+export default function AvailabilityPage(props: { params: Promise<{ id: string }> }) {
+  const [id, setId] = useState<string | null>(null);
 
   const [date, setDate] = useState("");
   const [slots, setSlots] = useState<{ start: string; end: string }[]>([]);
-  const [selectedSlot, setSelectedSlot] = useState<null | {
-    start: string;
-    end: string;
-  }>(null);
+  const [selectedSlot, setSelectedSlot] = useState<null | { start: string; end: string }>(null);
   const [people, setPeople] = useState(1);
   const [purpose, setPurpose] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  // MANUELLES LADEN
-  async function loadAvailability() {
-    if (!date) return;
-
-    setLoading(true);
-    setSlots([]);
-    setMessage("");
-
-    try {
-      const res = await fetch(
-        `http://localhost:4000/rooms/${id}/availability?date=${date}`
-      );
-
-      const data = await res.json();
-      setSlots(data.free ?? []);
-    } catch {
-      setMessage("Fehler beim Laden");
+  // 👉 params richtig extrahieren
+  useEffect(() => {
+    async function unwrap() {
+      const resolved = await props.params;
+      setId(resolved.id);
     }
+    unwrap();
+  }, [props.params]);
 
-    setLoading(false);
+  async function loadAvailability() {
+    if (!date || !id) return;
+
+    const res = await fetch(
+      `http://localhost:4000/rooms/${id}/availability?date=${date}`
+    );
+
+    const data = await res.json();
+    setSlots(data.free ?? []);
   }
 
-  // BUCHEN ------------------------------
   async function book() {
-    if (!selectedSlot) return;
+    if (!selectedSlot || !id) return;
 
     const payload = {
       roomId: id,
-      userId: "703dedca-b5bd-4494-85c7-cfa9576bb6c6",
+      userId: "703dedca-b5bd-4494-85c7-cfa9576bb6c6", // später dynamisch
       date,
       start: selectedSlot.start,
       end: selectedSlot.end,
@@ -63,15 +52,16 @@ export default function AvailabilityPage({
     });
 
     const data = await res.json();
-    if (res.ok) setMessage("✔️ Buchung erfolgreich gespeichert");
+    if (res.ok) setMessage("✔️ Buchung gespeichert!");
     else setMessage("❌ Fehler: " + data.error);
   }
+
+  if (!id) return <p>Wird geladen…</p>;
 
   return (
     <div className="p-10">
       <h1 className="text-2xl font-bold mb-4">Verfügbarkeit prüfen</h1>
 
-      {/* DATUM */}
       <input
         type="date"
         className="border px-3 py-2 rounded"
@@ -86,13 +76,8 @@ export default function AvailabilityPage({
         Prüfen
       </button>
 
-      {loading && <p>⏳ Wird geladen...</p>}
-
-      {/* ZEITSLOTS */}
       <div className="mt-6">
-        {!loading && slots.length === 0 && date && (
-          <p>Keine freien Zeiten</p>
-        )}
+        {slots.length === 0 && date && <p>Keine freien Zeiten</p>}
 
         {slots.length > 0 && (
           <ul>
