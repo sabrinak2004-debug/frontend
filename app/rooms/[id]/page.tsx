@@ -44,12 +44,9 @@ export default async function RoomDetailPage({
           className="object-cover"
         />
       </div>
-
-      {/* ZWEI SPALTEN */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-
+      <div>
         {/* LINKS: Beschreibung */}
-        <div className="bg-gray-50 p-20 rounded-xl shadow-sm">
+        <div className="bg-gray-50 p-5 rounded-xl shadow-sm">
           <h2 className="text-xl font-semibold mb-2">Beschreibung</h2>
           <p className="text-gray-700 leading-relaxed">{room.description}</p>
 
