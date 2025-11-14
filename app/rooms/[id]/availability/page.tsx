@@ -1,31 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AvailabilityPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const id = params.id;
 
+  // Lokaler State für die ID
+  const [roomId, setRoomId] = useState<string>("");
+
+  // params korrekt aus Promise auslesen
+  useEffect(() => {
+    async function loadParams() {
+      const p = await params;
+      setRoomId(p.id);
+    }
+    loadParams();
+  }, [params]);
+
+  // --- Ab hier dein Verfügbarkeits-Code ---
   const [date, setDate] = useState("");
   const [slots, setSlots] = useState<{ start: string; end: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [checked, setChecked] = useState(false); // 👈 Neu
+  const [checked, setChecked] = useState(false);
 
   async function loadAvailability() {
-    if (!date) return;
+    if (!date || !roomId) return;
 
     setLoading(true);
     setError("");
     setSlots([]);
-    setChecked(false); // wird erst nach erfolgreichem Laden aktiv
+    setChecked(false);
 
     try {
       const res = await fetch(
-        `http://localhost:4000/rooms/${id}/availability?date=${date}`
+        `http://localhost:4000/rooms/${roomId}/availability?date=${date}`
       );
 
       if (!res.ok) {
@@ -42,7 +54,12 @@ export default function AvailabilityPage({
     }
 
     setLoading(false);
-    setChecked(true); // 👈 jetzt darf angezeigt werden, ob es freie Zeiten gibt
+    setChecked(true);
+  }
+
+  // Wenn params noch lädt → Spinner
+  if (!roomId) {
+    return <p className="p-10">Wird geladen...</p>;
   }
 
   return (
@@ -54,7 +71,7 @@ export default function AvailabilityPage({
         value={date}
         onChange={(e) => {
           setDate(e.target.value);
-          setChecked(false); // Datum gewechselt → wieder neutraler Zustand
+          setChecked(false);
         }}
         className="border px-3 py-2 rounded"
       />
@@ -68,10 +85,8 @@ export default function AvailabilityPage({
 
       <div className="mt-6">
         {loading && <p>⏳ Wird geladen...</p>}
-
         {error && <p className="text-red-600">{error}</p>}
 
-        {/* ❗ Nur anzeigen, wenn wirklich geprüft wurde */}
         {!loading && checked && slots.length === 0 && !error && (
           <p className="text-red-600">❌ Keine freien Zeiten</p>
         )}
