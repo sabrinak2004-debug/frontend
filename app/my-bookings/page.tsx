@@ -38,7 +38,10 @@ export default function MyBookingsPage() {
 
   // BEI SEITENSTART LADEN -------------------
   useEffect(() => {
-    loadBookings();
+    async function fetchData() {
+      await loadBookings();
+    }
+    fetchData();    
   }, []);
 
   // BUCHUNG STORNIEREN
