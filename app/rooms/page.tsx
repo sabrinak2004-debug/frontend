@@ -82,7 +82,7 @@ export default function RoomsPage() {
                 className="w-full h-48 object-cover"
               />
 
-              <div className="absolute top-3 right-3 bg-black/70 text-white text-sm px-3 py-1 rounded-lg">
+              <div className="absolute top-3 right-3 bg-white/100 text-black-700 text-sm px-3 py-1 rounded-lg">
                 👥 {room.capacity} Personen
               </div>
             </div>
@@ -100,7 +100,7 @@ export default function RoomsPage() {
                 {room.features.map((f) => (
                   <span
                     key={f}
-                    className="bg-gray-100 border px-2 py-1 rounded-lg text-sm"
+                    className="bg-gray-100 px-2 py-1 rounded-lg text-sm"
                   >
                     💬 {f}
                   </span>
