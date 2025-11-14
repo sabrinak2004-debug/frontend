@@ -1,12 +1,10 @@
 export default async function RoomDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: { id: string };
 }) {
-  // params aus Promise holen
-  const { id } = await params;
+  const id = params.id;
 
-  // Raum laden
   const res = await fetch(`http://localhost:4000/rooms/${id}`, {
     cache: "no-store",
   });
@@ -18,28 +16,26 @@ export default async function RoomDetailPage({
   const room = await res.json();
 
   return (
-    <div style={{ padding: "40px" }}>
-      <h1 className="text-2xl font-bold mb-4">{room.name}</h1>
-      <p className="mb-4">{room.description}</p>
+    <div className="p-10">
+      <h1 className="text-3xl font-bold mb-4">{room.name}</h1>
 
-      <p>
+      <img
+        src={room.photo_url}
+        className="w-96 rounded shadow mb-4"
+        alt="Raumbild"
+      />
+
+      <p>{room.description}</p>
+
+      <p className="mt-3">
         <strong>Kapazität:</strong> {room.capacity}
       </p>
 
-      <p>
-        <strong>Ort:</strong> {room.location}
-      </p>
-
-      <p>
-        <strong>Ausstattung:</strong> {room.equipment}
-      </p>
-
-      {/* ➤ HIER DER WICHTIGE BUTTON */}
       <a
+        className="block mt-6 text-blue-600 underline"
         href={`/rooms/${id}/availability`}
-        className="mt-6 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
       >
-        Verfügbarkeit prüfen →
+        → Verfügbarkeit prüfen
       </a>
     </div>
   );
