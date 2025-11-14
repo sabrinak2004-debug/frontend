@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getAuth } from "@/lib/auth";
 
 type Room = {
   id: string;
@@ -16,6 +18,7 @@ type Room = {
 export default function RoomsPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [search, setSearch] = useState("");
+  const router = useRouter();
 
   // Räume laden
   useEffect(() => {
@@ -42,6 +45,18 @@ export default function RoomsPage() {
       room.features.some((f) => f.toLowerCase().includes(text))
     );
   });
+
+  function handleBookNow(roomId: string) {
+    const auth = getAuth();
+
+    if (!auth) {
+      // ⛔ nicht eingeloggt → zuerst Login
+      router.push(`/login?redirect=/rooms/${roomId}`);
+    } else {
+      // ✅ eingeloggt → direkt zur Buchungsseite
+      router.push(`/rooms/${roomId}`);
+    }
+  }
 
   return (
     <div className="p-10">
@@ -108,14 +123,14 @@ export default function RoomsPage() {
               </div>
 
               {/* Button */}
-              <a
-                href={`/rooms/${room.id}`}
+              <button
+                onClick={() => handleBookNow(room.id)}
                 className="block mt-5 bg-gradient-to-r from-indigo-500 to-blue-500
                            text-white text-center py-2 rounded-xl font-semibold
-                           hover:opacity-90 transition"
+                           hover:opacity-90 transition w-full"
               >
                 Jetzt buchen
-              </a>
+              </button>
             </div>
           </div>
         ))}
