@@ -17,7 +17,7 @@ export default function RootLayout({
       <body className="flex bg-white min-h-screen">
 
         {/* SIDEBAR */}
-        <aside className="w-72 bg-white border-r px-6 py-8 flex flex-col justify-between shadow-sm">
+        <aside className="w-72 bg-white -r px-6 py-8 flex flex-col justify-between shadow-sm">
           {/* LOGO */}
           <div>
             <div className="flex items-center gap-3 mb-10">
@@ -79,9 +79,9 @@ export default function RootLayout({
             </div>
           </div>
           {/* PROFIL-BEREICH-UNTEN */}
-          <div className="mt-10 border-t pt-4">
+          <div className="mt-10 -t pt-4">
             <div className="flex items-center gap-3">
-              <div className="bg-blue-600 text-white p-3 rounded-full">👤</div>
+              <div className=" p-2 rounded-full">👤</div>
               <div>
                 <p className="font-medium">Max Mustermann</p>
                 <p className="text-sm text-gray-500">max.mustermann@example.com</p>
