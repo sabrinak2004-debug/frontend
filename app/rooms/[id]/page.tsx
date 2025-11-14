@@ -54,7 +54,7 @@ export default async function RoomDetailPage({
           <p className="text-gray-700">{room.location}</p>
           <h2 className="text-lg font-semibold mb-2">Kapazität</h2>
           <p className="text-gray-700 mb-4">
-            👥 {room.capacity} Personen
+          👤{room.capacity} Personen
           </p>
 
           <h2 className="text-lg font-semibold mb-2">Ausstattung</h2>
