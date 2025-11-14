@@ -1,45 +1,55 @@
 "use client";
 
+import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { loginUser } from "@/lib/auth";
+import { saveAuth } from "@/lib/auth";
+
+const API = "http://localhost:4000";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const params = useSearchParams();
+
+  const redirect = params.get("redirect") || "/rooms";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [msg, setMsg] = useState("");
-
+  
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    const data = await loginUser(email, password);
+    const res = await fetch(`${API}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-    if (data.error) {
-      setMsg(data.error);
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Login fehlgeschlagen");
       return;
     }
-        
-    document.cookie = `token=${data.token}; path=/; max-age=604800`; 
 
-    localStorage.setItem("userId", data.userId);
+    saveAuth(data.userId, data.token);
 
-    setMsg("Login erfolgreich!");
+    router.push(redirect);
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Login</h1>
-
+    <div>
+      <h1>Einloggen</h1>
       <form onSubmit={handleLogin}>
-        <input type="email" placeholder="Uni E-Mail" value={email}
-               onChange={(e) => setEmail(e.target.value)} />
+        <label>E-Mail</label>
+        <input value={email} onChange={(e) => setEmail(e.target.value)} />
 
-        <input type="password" placeholder="Passwort" value={password}
-               onChange={(e) => setPassword(e.target.value)} />
+        <label>Passwort</label>
+        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
-        <button type="submit">Login</button>
+        <button type="submit">Einloggen</button>
       </form>
 
-      <p>{msg}</p>
+      <p>Noch kein Konto? <a href={`/register?redirect=${redirect}`}>Registrieren</a></p>
     </div>
   );
 }
