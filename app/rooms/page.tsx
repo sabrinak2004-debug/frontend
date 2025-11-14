@@ -61,7 +61,7 @@ export default function RoomsPage() {
           placeholder="Raum suchen..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full border rounded-xl px-4 py-3 shadow-sm"
+          className="w-full rounded-xl px-4 py-3 shadow-sm"
         />
       </div>
 
