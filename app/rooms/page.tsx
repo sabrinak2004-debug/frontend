@@ -1,5 +1,5 @@
-import { MapPin, Users, Info } from "lucide-react";
 import Image from "next/image";
+import { MapPin, Users, Info } from "lucide-react";
 
 type Room = {
   id: string;
@@ -11,71 +11,61 @@ type Room = {
 };
 
 export default async function RoomsPage() {
-  const res = await fetch("http://localhost:4000/rooms", {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    return <div>Fehler beim Laden der Räume.</div>;
-  }
-
+  const res = await fetch("http://localhost:4000/rooms", { cache: "no-store" });
   const rooms: Room[] = await res.json();
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">Alle Gruppenräume</h1>
+    <div className="p-10">
+      <h1 className="text-4xl font-bold mb-6">Alle Gruppenräume</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="flex flex-col gap-10">
         {rooms.map((room) => (
-          <a
+          <div
             key={room.id}
-            href={`/rooms/${room.id}`}
-            className="group block rounded-2xl overflow-hidden bg-white shadow hover:shadow-xl transition border border-gray-200"
+            className="bg-white rounded-xl shadow border overflow-hidden w-full max-w-4xl"
           >
-            {/* Bild */}
-            <div className="relative h-44 w-full">
-              {room.photo_url ? (
-                <Image
-                  src={room.photo_url}
-                  alt={room.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform"
-                />
-              ) : (
-                <div className="w-full h-full bg-gray-200" />
-              )}
+            {/* FOTO */}
+            {room.photo_url && (
+              <Image
+                src={room.photo_url}
+                alt={room.name}
+                width={1600}
+                height={600}
+                className="w-full h-64 object-cover"
+              />
+            )}
+
+            {/* TEXTE */}
+            <div className="p-6">
+              <h2 className="text-2xl font-semibold mb-3">{room.name}</h2>
+
+              <div className="flex flex-col gap-2 text-gray-700">
+
+                <p className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-blue-600" />
+                  {room.location}
+                </p>
+
+                <p className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-blue-600" />
+                  {room.capacity} Personen
+                </p>
+
+                <p className="flex items-center gap-2">
+                  <Info className="w-5 h-5 text-blue-600" />
+                  {room.features.join(", ")}
+                </p>
+              </div>
             </div>
 
-            {/* Inhalt */}
-            <div className="p-5">
-              <h2 className="text-xl font-semibold mb-1">{room.name}</h2>
-
-              {/* Ort */}
-              <p className="text-gray-600 flex items-center gap-2 mb-2">
-                <MapPin size={18} className="text-blue-700" />
-                {room.location}
-              </p>
-
-              {/* Kapazität */}
-              <p className="text-gray-700 flex items-center gap-2 mb-2">
-                <Users size={18} className="text-blue-700" />
-                {room.capacity} Personen
-              </p>
-
-              {/* Ausstattung */}
-              <p className="text-gray-700 flex items-center gap-2">
-                <Info size={18} className="text-blue-700" />
-                {room.features?.length > 0
-                  ? room.features.join(", ")
-                  : "Standard-Ausstattung"}
-              </p>
-            </div>
-
-            {/* Footer */}
-            <div className="bg-gradient-to-r from-blue-700 to-blue-600 text-white text-center py-3 text-sm font-medium">
+            {/* FOOTER BUTTON */}
+            <a
+              href={`/rooms/${room.id}`}
+              className="block text-center bg-blue-600 text-white py-3 font-medium hover:bg-blue-700 transition"
+            >
               → Details & Verfügbarkeit
-            </div>
-          </a>
+            </a>
+          </div>
         ))}
       </div>
     </div>
