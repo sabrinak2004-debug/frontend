@@ -70,7 +70,7 @@ export default function RoomsPage() {
         {filteredRooms.map((room) => (
           <div
             key={room.id}
-            className="bg-white rounded-2xl shadow-md border overflow-hidden"
+            className="bg-white rounded-2xl shadow-md overflow-hidden"
           >
             {/* Bild */}
             <div className="relative">
