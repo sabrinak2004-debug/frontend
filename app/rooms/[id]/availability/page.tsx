@@ -1,79 +1,71 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function AvailabilityPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
+  const id = params.id;
 
-  // Lokaler State für die ID
-  const [roomId, setRoomId] = useState<string>("");
-
-  // params korrekt aus Promise auslesen
-  useEffect(() => {
-    async function loadParams() {
-      const p = await params;
-      setRoomId(p.id);
-    }
-    loadParams();
-  }, [params]);
-
-  // --- Ab hier dein Verfügbarkeits-Code ---
   const [date, setDate] = useState("");
   const [slots, setSlots] = useState<{ start: string; end: string }[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [checked, setChecked] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<null | {
+    start: string;
+    end: string;
+  }>(null);
+  const [people, setPeople] = useState(1);
+  const [purpose, setPurpose] = useState("");
+  const [message, setMessage] = useState("");
 
   async function loadAvailability() {
-    if (!date || !roomId) return;
-
-    setLoading(true);
-    setError("");
+    if (!date) return;
     setSlots([]);
-    setChecked(false);
 
-    try {
-      const res = await fetch(
-        `http://localhost:4000/rooms/${roomId}/availability?date=${date}`
-      );
+    const res = await fetch(
+      `http://localhost:4000/rooms/${id}/availability?date=${date}`
+    );
 
-      if (!res.ok) {
-        setError("Serverfehler");
-        setLoading(false);
-        setChecked(true);
-        return;
-      }
-
-      const data = await res.json();
-      setSlots(data.free ?? []);
-    } catch {
-      setError("Fehler beim Laden.");
-    }
-
-    setLoading(false);
-    setChecked(true);
+    const data = await res.json();
+    setSlots(data.free ?? []);
   }
 
-  // Wenn params noch lädt → Spinner
-  if (!roomId) {
-    return <p className="p-10">Wird geladen...</p>;
+  // BUCHEN ------------------------------
+  async function book() {
+    if (!selectedSlot) return;
+
+    const payload = {
+      roomId: id,
+      userId: "703dedca-b5bd-4494-85c7-cfa9576bb6c6", // später dynamisch
+      date,
+      start: selectedSlot.start,
+      end: selectedSlot.end,
+      peopleCount: people,
+      purpose,
+    };
+
+    const res = await fetch("http://localhost:4000/bookings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (res.ok) setMessage("✔️ Buchung erfolgreich gespeichert");
+    else setMessage("❌ Fehler: " + data.error);
   }
 
   return (
     <div className="p-10">
       <h1 className="text-2xl font-bold mb-4">Verfügbarkeit prüfen</h1>
 
+      {/* DATUM */}
       <input
         type="date"
-        value={date}
-        onChange={(e) => {
-          setDate(e.target.value);
-          setChecked(false);
-        }}
         className="border px-3 py-2 rounded"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
       />
 
       <button
@@ -83,27 +75,61 @@ export default function AvailabilityPage({
         Prüfen
       </button>
 
+      {/* ZEITSLOTS */}
       <div className="mt-6">
-        {loading && <p>⏳ Wird geladen...</p>}
-        {error && <p className="text-red-600">{error}</p>}
-
-        {!loading && checked && slots.length === 0 && !error && (
-          <p className="text-red-600">❌ Keine freien Zeiten</p>
-        )}
+        {slots.length === 0 && date && <p>Keine freien Zeiten</p>}
 
         {slots.length > 0 && (
-          <div>
-            <h2 className="text-lg font-semibold mb-2">Freie Zeitfenster:</h2>
-            <ul className="list-disc ml-6">
-              {slots.map((slot, index) => (
-                <li key={index}>
+          <ul>
+            {slots.map((slot) => (
+              <li key={slot.start} className="mb-2">
+                <button
+                  className={`px-3 py-2 rounded border ${
+                    selectedSlot?.start === slot.start
+                      ? "bg-blue-600 text-white"
+                      : "bg-white"
+                  }`}
+                  onClick={() => setSelectedSlot(slot)}
+                >
                   {slot.start} – {slot.end}
-                </li>
-              ))}
-            </ul>
-          </div>
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
+
+      {selectedSlot && (
+        <div className="mt-6 p-4 border rounded w-80 bg-gray-50">
+          <h2 className="text-lg font-semibold mb-2">Buchung</h2>
+
+          <label>Personen:</label>
+          <input
+            type="number"
+            min={1}
+            value={people}
+            onChange={(e) => setPeople(Number(e.target.value))}
+            className="border px-2 py-1 w-full mb-3"
+          />
+
+          <label>Zweck:</label>
+          <input
+            type="text"
+            value={purpose}
+            onChange={(e) => setPurpose(e.target.value)}
+            className="border px-2 py-1 w-full mb-3"
+          />
+
+          <button
+            onClick={book}
+            className="bg-green-600 text-white px-4 py-2 rounded w-full"
+          >
+            Jetzt buchen
+          </button>
+
+          {message && <p className="mt-3">{message}</p>}
+        </div>
+      )}
     </div>
   );
 }
