@@ -7,7 +7,7 @@ export default function AvailabilityPage({
 }: {
   params: { id: string };
 }) {
-  const id = params.id;
+  const {id} = params;
 
   const [date, setDate] = useState("");
   const [slots, setSlots] = useState<{ start: string; end: string }[]>([]);
