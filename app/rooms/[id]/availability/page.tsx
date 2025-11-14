@@ -11,6 +11,7 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
   const [people, setPeople] = useState(1);
   const [purpose, setPurpose] = useState("");
   const [message, setMessage] = useState("");
+  const [hasChecked, setHasChecked] = useState(false);
 
   // 👉 params richtig extrahieren
   useEffect(() => {
@@ -23,6 +24,9 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
 
   async function loadAvailability() {
     if (!date || !id) return;
+    setHasChecked(true);
+    setSlots([]);
+    setSelectedSlot(null);
 
     const res = await fetch(
       `http://localhost:4000/rooms/${id}/availability?date=${date}`
@@ -66,7 +70,12 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
         type="date"
         className="border px-3 py-2 rounded"
         value={date}
-        onChange={(e) => setDate(e.target.value)}
+        onChange={(e) => {
+          setDate(e.target.value);
+          setHasChecked(false);
+          setSlots([]);
+          setSelectedSlot(null); 
+        }}
       />
 
       <button
@@ -77,7 +86,9 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
       </button>
 
       <div className="mt-6">
-        {slots.length === 0 && date && <p>Keine freien Zeiten</p>}
+        {hasChecked && slots.length === 0 && (
+          <p>Keine freien Zeiten an diesem Tag.</p>
+        )}
 
         {slots.length > 0 && (
           <ul>
