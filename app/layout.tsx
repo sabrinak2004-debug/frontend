@@ -83,8 +83,8 @@ export default function RootLayout({
             <div className="flex items-center gap-3">
               <div className="bg-blue-600 text-white p-3 rounded-full">👤</div>
               <div>
-                <p className="font-medium">Sabrina Klausmeier</p>
-                <p className="text-sm text-gray-500">sabrina.klausmeier@gmail.com</p>
+                <p className="font-medium">Max Mustermann</p>
+                <p className="text-sm text-gray-500">max.mustermann@example.com</p>
               </div>
             </div>
           </div>
