@@ -1,11 +1,11 @@
 import Image from "next/image";
-import { MapPin, Users, Info } from "lucide-react";
 
 type Room = {
   id: string;
   name: string;
-  location: string;
   capacity: number;
+  location: string;
+  description: string;
   features: string[];
   photo_url: string | null;
 };
@@ -16,55 +16,87 @@ export default async function RoomsPage() {
 
   return (
     <div className="p-10">
-      <h1 className="text-4xl font-bold mb-6">Alle Gruppenräume</h1>
 
-      <div className="flex flex-col gap-10">
+      {/* HEADER BANNER */}
+      <div className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white p-10 rounded-2xl shadow-lg mb-10">
+        <h1 className="text-4xl font-bold">Gruppenräume buchen</h1>
+        <p className="text-lg mt-2">
+          Finden Sie den perfekten Raum für Ihre Lerngruppe oder Ihr Projekt in der
+          Zentralbibliothek der Universität Hohenheim
+        </p>
+      </div>
+
+      {/* SUCHFELD */}
+      <div className="mb-8">
+        <input
+          type="text"
+          placeholder="Raum suchen..."
+          className="w-full border rounded-xl px-4 py-3 shadow-sm"
+        />
+      </div>
+
+      {/* RAUMKARTEN 3-SPALTIG */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         {rooms.map((room) => (
           <div
             key={room.id}
-            className="bg-white rounded-xl shadow border overflow-hidden w-full max-w-4xl"
+            className="bg-white rounded-2xl shadow-md border overflow-hidden"
           >
-            {/* FOTO */}
-            {room.photo_url && (
+            {/* Bild */}
+            <div className="relative">
               <Image
-                src={room.photo_url}
+                src={room.photo_url ?? "/placeholder.png"}
                 alt={room.name}
-                width={1600}
-                height={600}
-                className="w-full h-64 object-cover"
+                width={600}
+                height={400}
+                className="w-full h-48 object-cover"
               />
-            )}
 
-            {/* TEXTE */}
-            <div className="p-6">
-              <h2 className="text-2xl font-semibold mb-3">{room.name}</h2>
-
-              <div className="flex flex-col gap-2 text-gray-700">
-
-                <p className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-blue-600" />
-                  {room.location}
-                </p>
-
-                <p className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-blue-600" />
-                  {room.capacity} Personen
-                </p>
-
-                <p className="flex items-center gap-2">
-                  <Info className="w-5 h-5 text-blue-600" />
-                  {room.features.join(", ")}
-                </p>
+              {/* Kapazitäts-Badge */}
+              <div className="absolute top-3 right-3 bg-black/70 text-white text-sm px-3 py-1 rounded-lg">
+                👥 {room.capacity} Personen
               </div>
             </div>
 
-            {/* FOOTER BUTTON */}
-            <a
-              href={`/rooms/${room.id}`}
-              className="block text-center bg-blue-600 text-white py-3 font-medium hover:bg-blue-700 transition"
-            >
-              → Details & Verfügbarkeit
-            </a>
+            {/* Inhalt */}
+            <div className="p-5">
+              <h2 className="text-xl font-semibold">{room.name}</h2>
+              <p className="text-gray-500 mt-1 flex items-center gap-1">
+                📍 {room.location}
+              </p>
+
+              <p className="mt-2 text-gray-700 line-clamp-2">
+                {room.description}
+              </p>
+
+              {/* FEATURES */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                {room.features?.map((f) => (
+                  <span
+                    key={f}
+                    className="bg-gray-100 border px-2 py-1 rounded-lg text-sm flex items-center"
+                  >
+                    💬 {f}
+                  </span>
+                ))}
+
+                {room.features?.length === 0 && (
+                  <span className="bg-gray-100 border px-2 py-1 rounded-lg text-sm">
+                    WLAN
+                  </span>
+                )}
+              </div>
+
+              {/* BUTTON */}
+              <a
+                href={`/rooms/${room.id}`}
+                className="block mt-5 bg-gradient-to-r from-indigo-500 to-blue-500
+                           text-white text-center py-2 rounded-xl font-semibold
+                           hover:opacity-90 transition"
+              >
+                Jetzt buchen
+              </a>
+            </div>
           </div>
         ))}
       </div>
