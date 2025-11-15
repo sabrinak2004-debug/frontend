@@ -2,62 +2,110 @@
 
 import { useState, useEffect, useMemo } from "react";
 
+type Slot = { start: string; end: string };
+type BookingAPI = { starts_at: string; ends_at: string };
+
 export default function AvailabilityPage(props: { params: Promise<{ id: string }> }) {
   const [id, setId] = useState<string | null>(null);
 
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [slots, setSlots] = useState<{ start: string; end: string }[]>([]);
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [bookedSlots, setBookedSlots] = useState<Slot[]>([]);
+
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
 
   const [people, setPeople] = useState(1);
   const [purpose, setPurpose] = useState("");
 
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // params extrahieren (Next.js 13 Besonderheit)
+
+  // -------------------------------------
+  // PARAMS EXTRACT (NO CONDITIONAL HOOKS)
+  // -------------------------------------
   useEffect(() => {
-    async function unwrap() {
+    (async () => {
       const resolved = await props.params;
       setId(resolved.id);
-    }
-    unwrap();
+    })();
   }, [props.params]);
 
-  // Slots laden
+
+  // -------------------------------------
+  // LOAD FREE + BOOKED SLOTS
+  // -------------------------------------
   async function loadAvailability() {
     if (!id || !date) return;
-    setLoading(true);
+
     setSlots([]);
+    setBookedSlots([]);
     setStart("");
     setEnd("");
     setMessage("");
 
-    const res = await fetch(
-      `http://localhost:4000/rooms/${id}/availability?date=${date}`,
-      { cache: "no-store" }
+    // 1) freie Slots
+    const freeRes = await fetch(
+      `http://localhost:4000/rooms/${id}/availability?date=${date}`
     );
+    const freeData = await freeRes.json();
+    setSlots(freeData.free ?? []);
 
-    const data = await res.json();
-    setSlots(data.free ?? []);
-    setLoading(false);
+    // 2) gebuchte Slots
+    const bookedRes = await fetch(
+      `http://localhost:4000/bookings/by-room-and-date?roomId=${id}&date=${date}`
+    );
+    const bookedData: BookingAPI[] = await bookedRes.json();
+
+    const normalized = bookedData.map((b) => ({
+      start: b.starts_at.substring(11, 16),
+      end: b.ends_at.substring(11, 16),
+    }));
+
+    setBookedSlots(normalized);
   }
 
-  // Endzeit hängt von Startzeit ab
-  const endOptions = useMemo(() => {
-    if (!start) return slots;
-    const index = slots.findIndex((s) => s.start === start);
-    return slots.slice(index + 1);
-  }, [slots, start]);
 
-  // Buchen
+  // -------------------------------------
+  // OVERLAPPING CHECK (HOOK-SAFE VERSION)
+  // -------------------------------------
+  const error = useMemo(() => {
+    if (!start || !end) return "";
+
+    for (const b of bookedSlots) {
+      const overlaps = !(end <= b.start || start >= b.end);
+      if (overlaps) return "Dieser Zeitraum ist bereits gebucht";
+    }
+
+    return "";
+  }, [start, end, bookedSlots]);
+
+
+  // -------------------------------------
+  // MERGE FREE + BOOKED TIMES
+  // -------------------------------------
+  const allTimes: Slot[] = useMemo(() => {
+    const combined = [...slots, ...bookedSlots];
+    // Duplikate entfernen
+    const unique = new Map<string, Slot>();
+    for (const s of combined) {
+      unique.set(s.start + s.end, s);
+    }
+    return Array.from(unique.values()).sort((a, b) =>
+      a.start.localeCompare(b.start)
+    );
+  }, [slots, bookedSlots]);
+
+
+  // -------------------------------------
+  // BOOKING SEND
+  // -------------------------------------
   async function book() {
-    if (!id || !start || !end) return;
+    if (!id || !start || !end || error) return;
 
     const payload = {
       roomId: id,
-      userId: "703dedca-b5bd-4494-85c7-cfa9576bb6c6", // später dynamisch
+      userId: "703dedca-b5bd-4494-85c7-cfa9576bb6c6",
       date,
       start,
       end,
@@ -77,19 +125,27 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
     else setMessage("❌ Fehler: " + (data.error || "Unbekannter Fehler"));
   }
 
+
+  // -------------------------------------
+  // SAFE EARLY RETURN (AFTER ALL HOOKS)
+  // -------------------------------------
   if (!id) return <div className="p-10">Wird geladen…</div>;
 
-  // Tailwind Input Styles
+
+  // -------------------------------------
+  // UI
+  // -------------------------------------
+
   const inputCls =
     "w-full h-12 rounded-xl border border-slate-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500";
-
   const labelCls = "text-sm font-medium text-slate-800";
   const groupCls = "flex flex-col gap-2";
 
   return (
     <div className="p-10 flex justify-center">
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl border border-slate-100 p-7">
-        {/* Header */}
+
+        {/* HEADER */}
         <div className="flex items-center gap-3 mb-6">
           <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
             📅
@@ -99,10 +155,16 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
           </h2>
         </div>
 
-        {/* Formular */}
+        {/* ERROR BANNER */}
+        {error && (
+          <div className="border border-red-300 bg-red-50 text-red-600 p-4 rounded-xl mb-6 flex items-center gap-2">
+            ❗ {error}
+          </div>
+        )}
+
         <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-6">
 
-          {/* Datum */}
+          {/* DATUM */}
           <div className={groupCls}>
             <label className={labelCls}>Datum</label>
             <input
@@ -113,7 +175,6 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
             />
           </div>
 
-          {/* Button Verfügbarkeit prüfen */}
           <button
             type="button"
             onClick={loadAvailability}
@@ -122,9 +183,10 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
             Verfügbarkeit prüfen
           </button>
 
-          {/* Start / Endzeit */}
+          {/* START / END */}
           {slots.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
               <div className={groupCls}>
                 <label className={labelCls}>Startzeit</label>
                 <select
@@ -133,8 +195,8 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
                   onChange={(e) => setStart(e.target.value)}
                 >
                   <option value="">Wählen…</option>
-                  {slots.map((s) => (
-                    <option key={s.start} value={s.start}>
+                  {allTimes.map((s, i) => (
+                    <option key={i} value={s.start}>
                       {s.start}
                     </option>
                   ))}
@@ -150,17 +212,18 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
                   disabled={!start}
                 >
                   <option value="">Wählen…</option>
-                  {endOptions.map((s) => (
-                    <option key={s.end} value={s.end}>
+                  {allTimes.map((s, i) => (
+                    <option key={i} value={s.end}>
                       {s.end}
                     </option>
                   ))}
                 </select>
               </div>
+
             </div>
           )}
 
-          {/* Personen */}
+          {/* PERSONEN */}
           {slots.length > 0 && (
             <div className={groupCls}>
               <label className={labelCls}>Anzahl Personen</label>
@@ -174,7 +237,7 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
             </div>
           )}
 
-          {/* Zweck */}
+          {/* ZWECK */}
           {slots.length > 0 && (
             <div className={groupCls}>
               <label className={labelCls}>Zweck (optional)</label>
@@ -187,33 +250,37 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
             </div>
           )}
 
-          {/* Jetzt buchen */}
+          {/* BOOKED TIMES */}
+          {bookedSlots.length > 0 && (
+            <div className="mt-3 p-5 rounded-2xl border border-slate-200 bg-blue-50">
+              <div className="flex items-center gap-2 mb-2 text-slate-800">
+                🕒
+                <h3 className="font-semibold text-xl">
+                  Gebuchte Zeiten am {new Date(date).toLocaleDateString("de-DE")}:
+                </h3>
+              </div>
+
+              {bookedSlots.map((s, i) => (
+                <p key={i} className="text-slate-700 text-lg">
+                  {s.start} – {s.end}
+                </p>
+              ))}
+            </div>
+          )}
+
+          {/* BUCHEN BUTTON */}
           {slots.length > 0 && (
             <button
               type="button"
               onClick={book}
-              disabled={!start || !end}
+              disabled={!start || !end || !!error}
               className="h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-semibold shadow hover:opacity-90 disabled:opacity-40 transition"
             >
               Jetzt buchen
             </button>
           )}
 
-          {/* Message */}
-          {message && (
-            <div className="mt-3 text-sm text-slate-700">{message}</div>
-          )}
-
-          {/* Keine Slots */}
-          {slots.length === 0 && !loading && (
-            <p className="text-sm text-slate-500">
-              Noch keine Zeit ausgewählt oder keine freien Zeitfenster.
-            </p>
-          )}
-
-          {loading && (
-            <p className="text-sm text-slate-500">Verfügbarkeit wird geladen…</p>
-          )}
+          {message && <div className="mt-3 text-sm text-slate-700">{message}</div>}
         </form>
       </div>
     </div>
