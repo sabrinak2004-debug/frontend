@@ -68,7 +68,7 @@ export default function MyBookingsPage() {
     });
 
   // Uhrzeit formatieren (Postgres TIME → "HH:MM:SS")
-  const formatTime = (t: string) => t.slice(0, 5);
+  const formatTime = (t: string) => t.substring(11, 16);
 
   return (
     <div className="p-10">
