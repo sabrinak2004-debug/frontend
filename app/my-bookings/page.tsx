@@ -21,6 +21,7 @@ export default function MyBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
+  // Buchungen laden
   async function loadBookings() {
     setLoading(true);
 
@@ -34,12 +35,14 @@ export default function MyBookingsPage() {
     setLoading(false);
   }
 
+  // beim Seitenstart laden
   useEffect(() => {
     (async () => {
       await loadBookings();
     })();
   }, []);
 
+  // Stornieren
   async function cancelBooking(id: string) {
     const res = await fetch(
       `http://localhost:4000/bookings/${id}/cancel`,
@@ -55,6 +58,7 @@ export default function MyBookingsPage() {
     loadBookings();
   }
 
+  // Datum formatieren
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("de-DE", {
       weekday: "long",
@@ -63,6 +67,7 @@ export default function MyBookingsPage() {
       year: "numeric",
     });
 
+  // Uhrzeit formatieren (Postgres TIME → "HH:MM:SS")
   const formatTime = (t: string) => t.slice(0, 5);
 
   return (
@@ -94,6 +99,7 @@ export default function MyBookingsPage() {
         <p className="text-slate-600">Du hast noch keine Buchungen.</p>
       )}
 
+      {/* Buchungskarten */}
       <div className="space-y-6 max-w-3xl">
         {bookings.map((b) => (
           <div
