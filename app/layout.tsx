@@ -3,8 +3,8 @@
 import "./globals.css";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { isLoggedIn } from "@/lib/auth";
+import { useEffect, useState } from "react";
+import { isLoggedIn, getCurrentUser, logout } from "@/lib/auth";
 
 export default function RootLayout({
   children,
@@ -14,27 +14,41 @@ export default function RootLayout({
   const pathname = usePathname();
   const router = useRouter();
 
-  // LOGIN-SCHUTZ
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+
+  // Login-Redirect + User laden
   useEffect(() => {
     const publicRoutes = ["/login", "/register"];
 
-    if (!publicRoutes.includes(pathname) && !isLoggedIn()) {
-      router.replace("/login");
+    async function checkAuth() {
+      if (!publicRoutes.includes(pathname)) {
+        if (!isLoggedIn()) {
+          router.replace("/login");
+          return;
+        }
+
+        const u = await getCurrentUser();
+        setUser(u);
+      }
     }
+
+    checkAuth();
   }, [pathname, router]);
 
-  // Login/Registrierung → KEINE Sidebar
   const isAuthPage = pathname === "/login" || pathname === "/register";
+
+  function handleLogout() {
+    logout();
+    router.replace("/login");
+  }
 
   return (
     <html lang="de">
       <body className="flex bg-white min-h-screen">
 
         {isAuthPage ? (
-          // NUR LOGIN / REGISTRATION
           <main className="flex-1">{children}</main>
         ) : (
-          // MIT SIDEBAR
           <>
             {/* SIDEBAR */}
             <aside className="w-72 bg-white px-6 py-8 flex flex-col justify-between shadow-sm border-r">
@@ -53,69 +67,42 @@ export default function RootLayout({
 
                 {/* NAVIGATION */}
                 <nav className="flex flex-col gap-2">
-                  <Link
-                    href="/rooms"
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  >
+                  <Link href="/rooms" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50">
                     📅 Alle Räume
                   </Link>
-
-                  <Link
-                    href="/my-bookings"
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  >
+                  <Link href="/my-bookings" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50">
                     ⭐ Meine Buchungen
                   </Link>
                 </nav>
-
-                {/* ÖFFNUNGSZEITEN */}
-                <div className="mt-10">
-                  <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                    Öffnungszeiten
-                  </h2>
-
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 text-gray-700 font-medium">
-                      🕒 Ausleihe & Räume
-                    </div>
-                    <p className="text-sm text-gray-600 ml-7 mt-1">
-                      Mo - Fr: 08:00 - 22:00<br />
-                      Sa - So: 10:00 - 18:00
-                    </p>
-                  </div>
-
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 text-gray-700 font-medium">
-                      📞 Auskunft
-                    </div>
-                    <p className="text-sm text-gray-600 ml-7 mt-1">
-                      Mo - Fr: 09:00 - 17:00<br />
-                      Tel. 0711 / 459-22096
-                    </p>
-                  </div>
-
-                  <p className="text-xs text-gray-500 ml-1 mt-1">
-                    An gesetzlichen Feiertagen geschlossen
-                  </p>
-                </div>
               </div>
 
-              {/* PROFIL */}
+              {/* PROFIL UNTERER BEREICH */}
               <div className="mt-10 border-t pt-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-full">👤</div>
+                {user ? (
                   <div>
-                    <p className="font-medium">Max Mustermann</p>
-                    <p className="text-sm text-gray-500">
-                      max.mustermann@example.com
-                    </p>
-                  </div>
-                </div>
-              </div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 bg-blue-100 rounded-full text-lg">
+                        👤
+                      </div>
+                      <div>
+                        <p className="font-medium">{user.name}</p>
+                        <p className="text-sm text-gray-500">{user.email}</p>
+                      </div>
+                    </div>
 
+                    <button
+                      onClick={handleLogout}
+                      className="text-red-600 text-sm hover:underline"
+                    >
+                      Abmelden
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400">Lade Benutzer...</p>
+                )}
+              </div>
             </aside>
 
-            {/* CONTENT */}
             <main className="flex-1 p-10">{children}</main>
           </>
         )}

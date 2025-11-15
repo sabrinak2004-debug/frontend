@@ -1,44 +1,69 @@
-"use client";
+// /lib/auth.ts
+
+export function saveToken(token: string) {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("token", token);
+  }
+}
+
+export function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("token");
+}
+
+export function isLoggedIn(): boolean {
+  return !!getToken();
+}
+
+export function logout() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("token");
+  }
+}
+
+export async function getCurrentUser() {
+  const token = getToken();
+  if (!token) return null;
+
+  const res = await fetch("http://localhost:4000/me", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) return null;
+
+  return await res.json();
+}
 
 export async function login(email: string, password: string) {
-  const res = await fetch("http://localhost:4000/auth/login", {
+  const res = await fetch("http://localhost:4000/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Login failed");
 
-  // JWT speichern
-  localStorage.setItem("token", data.token);
-  localStorage.setItem("userId", data.userId);
+  if (!res.ok) {
+    throw new Error(data.error || "Login fehlgeschlagen");
+  }
 
+  saveToken(data.token);
   return data;
 }
 
-export async function registerUser(
-  email: string,
-  password: string,
-  displayName: string
-) {
-  const res = await fetch("http://localhost:4000/auth/register", {
+export async function register(email: string, password: string, name: string) {
+  const res = await fetch("http://localhost:4000/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, displayName }),
+    body: JSON.stringify({ email, password, name }),
   });
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Registrierung fehlgeschlagen");
 
+  if (!res.ok) {
+    throw new Error(data.error || "Registrierung fehlgeschlagen");
+  }
+
+  saveToken(data.token);
   return data;
-}
-
-export function logout() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("userId");
-}
-
-export function isLoggedIn(): boolean {
-  return !!localStorage.getItem("token");
 }
