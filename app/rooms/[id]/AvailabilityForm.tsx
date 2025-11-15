@@ -1,77 +1,110 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { getUserId } from "@/lib/auth";
-
 
 type Slot = { start: string; end: string };
 type BookingAPI = { starts_at: string; ends_at: string };
 
 export default function AvailabilityForm({ roomId }: { roomId: string }) {
+  const userId = getUserId();
+
+  // Form states
   const [date, setDate] = useState(() =>
     new Date().toISOString().substring(0, 10)
   );
-
   const [slots, setSlots] = useState<Slot[]>([]);
-  const [booked, setBooked] = useState<Slot[]>([]);
+  const [roomBookings, setRoomBookings] = useState<Slot[]>([]);
+
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [people, setPeople] = useState(1);
   const [purpose, setPurpose] = useState("");
-  const [error, setError] = useState("");
+
   const [message, setMessage] = useState("");
-  const userId = getUserId();
+  const [error, setError] = useState("");
 
+  // ----------------------------
+  // 🔹 Zeit in Minuten umrechnen
+  // ----------------------------
+  const toMinutes = (t: string) => {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
+  };
 
-  async function loadAvailability() {
-    setError("");
+  // ------------------------------------
+  // 🔹 Prüfen ob ein Zeitraum überschneidet
+  // ------------------------------------
+  const isOverlapping = (s: string, e: string) => {
+    const sMin = toMinutes(s);
+    const eMin = toMinutes(e);
+
+    return roomBookings.some((b) => {
+      const bs = toMinutes(b.start);
+      const be = toMinutes(b.end);
+      return sMin < be && eMin > bs;
+    });
+  };
+
+  // -------------------------------------------
+  // 🔹 Verfügbarkeit + Buchungen für den Tag laden
+  // -------------------------------------------
+  const loadAvailability = useCallback(async () => {
     setMessage("");
+    setError("");
+    setStart("");
+    setEnd("");
 
-    // freie Slots
+    // 1) Freie Slots abrufen
     const freeRes = await fetch(
       `http://localhost:4000/rooms/${roomId}/availability?date=${date}`
     );
     const freeData = await freeRes.json();
     setSlots(freeData.free || []);
 
-    // gebuchte Slots
+    // 2) ALLE Buchungen dieses Raumes an diesem Tag abrufen
     const bookedRes = await fetch(
       `http://localhost:4000/bookings/by-room-and-date?roomId=${roomId}&date=${date}`
     );
+    const bookedData: BookingAPI[] = await bookedRes.json();
 
-    const bookedRaw = await bookedRes.json();
-    const normalized = (bookedRaw || []).map((b: BookingAPI) => ({
-      start: b.starts_at.substring(0, 5),
-      end: b.ends_at.substring(0, 5),
+    const normalized = bookedData.map((b) => ({
+      start: b.starts_at.substring(11, 16),
+      end: b.ends_at.substring(11, 16),
     }));
 
-    setBooked(normalized);
-  }
+    setRoomBookings(normalized);
+  }, [date, roomId]);
 
-  // Endzeiten abhängig vom Start
-  const endOptions = useMemo(() => {
-    if (!start) return slots;
+  // ----------------------------
+  // 🔹 Endzeiten nach Startzeit
+  // ----------------------------
+  const getEndOptions = () => {
+    if (!start) return [];
     const idx = slots.findIndex((s) => s.start === start);
     return slots.slice(idx + 1);
-  }, [slots, start]);
+  };
 
-  function isOverlapping(startTime: string, endTime: string) {
-    return booked.some(
-      (b) => startTime < b.end && endTime > b.start
-    );
-  }
-
+  // ----------------------------
+  // 🔹 Buchungs-Anfrage senden
+  // ----------------------------
   async function book() {
     if (!start || !end) return;
 
+    if (!userId) {
+      setError("Du bist nicht eingeloggt.");
+      return;
+    }
+
+    // Doppelbuchung verhindern
     if (isOverlapping(start, end)) {
-      setError("Dieser Zeitraum ist bereits gebucht");
+      setError("❌ Dieser Zeitraum ist bereits gebucht.");
       return;
     }
 
     const payload = {
       roomId,
-      userId: userId!,
+      userId,
       date,
       start,
       end,
@@ -87,23 +120,29 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
 
     const data = await res.json();
 
-    if (res.ok) {
-      setMessage("✔️ Buchung erfolgreich gespeichert");
-      loadAvailability();
-    } else {
+    if (!res.ok) {
       setError(data.error || "Fehler beim Buchen");
+      return;
     }
+
+    setMessage("✔️ Buchung erfolgreich gespeichert!");
+    loadAvailability();
   }
 
+  // ------------------------------------
+  // 🔹 Styling
+  // ------------------------------------
   const inputCls =
     "w-full h-12 rounded-xl border border-slate-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500";
-
   const labelCls = "text-sm font-medium text-slate-800";
 
+  // ------------------------------------
+  // 🔹 UI Rendering
+  // ------------------------------------
   return (
     <div className="bg-white p-7 rounded-3xl shadow border border-slate-100 w-full">
-      
-      {/* Header */}
+
+      {/* HEADER */}
       <div className="flex items-center gap-3 mb-6">
         <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
           📅
@@ -111,13 +150,14 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
         <h2 className="text-2xl font-semibold text-slate-900">Raum buchen</h2>
       </div>
 
+      {/* ERROR */}
       {error && (
         <div className="border border-red-300 bg-red-50 text-red-600 p-4 rounded-xl mb-4 text-sm font-medium">
           ❗ {error}
         </div>
       )}
 
-      {/* Datum */}
+      {/* DATUM */}
       <label className={labelCls}>Datum</label>
       <input
         type="date"
@@ -134,7 +174,7 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
         Verfügbarkeit prüfen
       </button>
 
-      {/* Start / Endzeit */}
+      {/* START & END ZEIT */}
       {slots.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
           <div>
@@ -162,7 +202,7 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
               disabled={!start}
             >
               <option value="">Wählen…</option>
-              {endOptions.map((s) => (
+              {getEndOptions().map((s) => (
                 <option key={s.end} value={s.end}>
                   {s.end}
                 </option>
@@ -172,7 +212,7 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
         </div>
       )}
 
-      {/* Personen */}
+      {/* PERSONEN */}
       {slots.length > 0 && (
         <div className="mt-6">
           <label className={labelCls}>Anzahl Personen</label>
@@ -186,7 +226,7 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
         </div>
       )}
 
-      {/* Zweck */}
+      {/* ZWECK */}
       {slots.length > 0 && (
         <div className="mt-6">
           <label className={labelCls}>Zweck (optional)</label>
@@ -198,6 +238,7 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
         </div>
       )}
 
+      {/* BUCHEN */}
       {slots.length > 0 && (
         <button
           type="button"
@@ -208,23 +249,22 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
         </button>
       )}
 
-      {/* Gebuchte Slots */}
-      {booked.length > 0 && (
+      {/* ALLE BUCHUNGEN DES TAGES */}
+      {roomBookings.length > 0 && (
         <div className="mt-8 p-5 rounded-2xl bg-blue-50 border border-blue-200">
-          <div className="text-lg font-semibold text-slate-900">
-            Gebuchte Zeiten am {date}:
+          <div className="font-semibold text-slate-900">
+            Bereits gebuchte Zeiten am {date}:
           </div>
 
           <ul className="mt-3 text-slate-700 space-y-1">
-            {booked.map((b, i) => (
-              <li key={i}>
-                ⏰ {b.start} – {b.end}
-              </li>
+            {roomBookings.map((b, i) => (
+              <li key={i}>⏰ {b.start} – {b.end} Uhr</li>
             ))}
           </ul>
         </div>
       )}
 
+      {/* SUCCESS MESSAGE */}
       {message && (
         <div className="mt-4 text-green-700 font-medium">{message}</div>
       )}
