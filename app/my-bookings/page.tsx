@@ -21,7 +21,6 @@ export default function MyBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-  // BUCHUNGEN LADEN -----------------------
   async function loadBookings() {
     setLoading(true);
 
@@ -32,19 +31,15 @@ export default function MyBookingsPage() {
 
     const data = await res.json();
     setBookings(data);
-
     setLoading(false);
   }
 
-  // BEI SEITENSTART LADEN -------------------
   useEffect(() => {
-    async function fetchData() {
+    (async () => {
       await loadBookings();
-    }
-    fetchData();    
+    })();
   }, []);
 
-  // BUCHUNG STORNIEREN
   async function cancelBooking(id: string) {
     const res = await fetch(
       `http://localhost:4000/bookings/${id}/cancel`,
@@ -57,60 +52,108 @@ export default function MyBookingsPage() {
     }
 
     setMessage("✔️ Buchung storniert");
-    loadBookings(); // neu laden
+    loadBookings();
   }
+
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString("de-DE", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+  const formatTime = (t: string) => t.slice(0, 5);
 
   return (
     <div className="p-10">
-      <h1 className="text-3xl font-bold mb-6">Meine Buchungen</h1>
+      {/* HEADER */}
+      <h1 className="text-4xl font-bold text-slate-900">Meine Buchungen</h1>
+      <p className="text-slate-600 mt-2 mb-10">
+        Übersicht Ihrer gebuchten Gruppenräume in der Zentralbibliothek Hohenheim
+      </p>
 
-      {loading && <p>Wird geladen...</p>}
+      {/* SECTION TITLE */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="text-indigo-600 text-xl">📅</div>
+        <h2 className="text-2xl font-semibold text-slate-900">
+          Kommende Buchungen
+        </h2>
+      </div>
 
-      {message && <p className="mb-4 text-green-700">{message}</p>}
+      {/* Loading */}
+      {loading && <p className="text-slate-600">Wird geladen…</p>}
 
-      {bookings.length === 0 && !loading && (
-        <p>Du hast noch keine Buchungen.</p>
+      {/* Message */}
+      {message && (
+        <p className="mb-4 text-green-700 font-medium">{message}</p>
       )}
 
-      <ul className="space-y-4">
+      {/* Keine Buchungen */}
+      {!loading && bookings.length === 0 && (
+        <p className="text-slate-600">Du hast noch keine Buchungen.</p>
+      )}
+
+      <div className="space-y-6 max-w-3xl">
         {bookings.map((b) => (
-          <li key={b.id} className="border rounded p-4 bg-white shadow">
-            <h2 className="text-xl font-semibold">{b.rooms.name}</h2>
+          <div
+            key={b.id}
+            className="bg-white rounded-2xl shadow-md border border-slate-200 p-6 flex justify-between items-center"
+          >
+            {/* Left side */}
+            <div>
+              <h3 className="text-xl font-semibold text-slate-900">
+                {b.rooms.name}
+              </h3>
 
-            <p>
-              <strong>Datum:</strong>{" "}
-              {new Date(b.date).toLocaleDateString("de-DE")}
-            </p>
+              {/* Datum */}
+              <div className="flex items-center gap-2 mt-3 text-slate-600">
+                <span>📆</span>
+                <span>{formatDate(b.date)}</span>
+              </div>
 
-            <p>
-              <strong>Zeit:</strong> {b.starts_at.slice(11, 16)} –{" "}
-              {b.ends_at.slice(11, 16)}
-            </p>
+              {/* Uhrzeit */}
+              <div className="flex items-center gap-2 mt-2 text-slate-600">
+                <span>⏰</span>
+                <span>
+                  {formatTime(b.starts_at)} – {formatTime(b.ends_at)}
+                </span>
+              </div>
 
-            <p>
-              <strong>Status:</strong>{" "}
+              {/* Personen */}
+              <div className="flex items-center gap-2 mt-2 text-slate-600">
+                <span>👥</span>
+                <span>1 Personen</span>
+              </div>
+            </div>
+
+            {/* Right side */}
+            <div className="flex flex-col items-end gap-3">
+              {/* Status Badge */}
               <span
-                className={
+                className={`px-4 py-1 rounded-full text-sm font-semibold ${
                   b.status === "cancelled"
-                    ? "text-red-600"
-                    : "text-green-600"
-                }
+                    ? "bg-red-100 text-red-700"
+                    : "bg-green-100 text-green-700"
+                }`}
               >
-                {b.status}
+                {b.status === "cancelled" ? "Storniert" : "Bestätigt"}
               </span>
-            </p>
 
-            {b.status !== "cancelled" && (
-              <button
-                onClick={() => cancelBooking(b.id)}
-                className="mt-3 bg-red-600 text-white px-4 py-2 rounded"
-              >
-                Stornieren
-              </button>
-            )}
-          </li>
+              {/* Delete button */}
+              {b.status !== "cancelled" && (
+                <button
+                  onClick={() => cancelBooking(b.id)}
+                  className="text-red-600 text-xl hover:text-red-800 transition"
+                  title="Buchung löschen"
+                >
+                  🗑️
+                </button>
+              )}
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
