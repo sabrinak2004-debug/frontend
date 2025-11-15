@@ -6,14 +6,14 @@ import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   async function handleRegister() {
     try {
-      await register(email, password, name);
+      await register(email, password, displayName);
       router.push("/rooms");
     } catch {
       setError("Registrierung fehlgeschlagen");
@@ -28,8 +28,8 @@ export default function RegisterPage() {
 
       <input className="border p-2 rounded w-80"
              placeholder="Name"
-             value={name}
-             onChange={(e) => setName(e.target.value)} />
+             value={displayName}
+             onChange={(e) => setDisplayName(e.target.value)} />
 
       <input className="border p-2 rounded w-80"
              placeholder="Uni-Hohenheim E-Mail"

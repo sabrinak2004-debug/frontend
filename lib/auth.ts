@@ -51,11 +51,11 @@ export async function login(email: string, password: string) {
   return data;
 }
 
-export async function register(email: string, password: string, name: string) {
+export async function register(email: string, password: string, displayName: string) {
   const res = await fetch("http://localhost:4000/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, displayName: name }),
+    body: JSON.stringify({ email, password, displayName }),
   });
 
   const data = await res.json();
