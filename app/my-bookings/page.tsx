@@ -101,7 +101,9 @@ export default function MyBookingsPage() {
 
       {/* Buchungskarten */}
       <div className="space-y-6 max-w-3xl">
-        {bookings.map((b) => (
+        {bookings.map((b) => {
+          console.log("DEBUG TIME:", b.starts_at, typeof b.starts_at);
+          return (
           <div
             key={b.id}
             className="bg-white rounded-2xl shadow-md border border-slate-200 p-6 flex justify-between items-center"
@@ -158,7 +160,8 @@ export default function MyBookingsPage() {
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
