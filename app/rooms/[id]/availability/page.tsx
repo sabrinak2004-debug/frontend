@@ -1,15 +1,22 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { use, useState, useMemo } from "react";
 
 type Slot = { start: string; end: string };
-type BookingAPI = { starts_at: string; ends_at: string };
+type BookingAPI = { starts_at: string; ends_at: string; };
 
 export default function AvailabilityPage(props: { params: Promise<{ id: string }> }) {
-  const [id, setId] = useState<string | null>(null);
+  // ✔ params korrekt entpacken (Next.js 13+)
+  const { id } = use(props.params);
 
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [slots, setSlots] = useState<Slot[]>([]);
+  // ----------------------
+  // STATE
+  // ----------------------
+  const [date, setDate] = useState(() =>
+    new Date().toISOString().substring(0, 10)
+  );
+
+  const [availableSlots, setAvailableSlots] = useState<Slot[]>([]);
   const [bookedSlots, setBookedSlots] = useState<Slot[]>([]);
 
   const [start, setStart] = useState("");
@@ -18,95 +25,82 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
   const [people, setPeople] = useState(1);
   const [purpose, setPurpose] = useState("");
 
+  const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
+  // ----------------------
+  // HELFER
+  // ----------------------
+  const formatTime = (t: string) => t.substring(0, 5);
 
-  // -------------------------------------
-  // PARAMS EXTRACT (NO CONDITIONAL HOOKS)
-  // -------------------------------------
-  useEffect(() => {
-    (async () => {
-      const resolved = await props.params;
-      setId(resolved.id);
-    })();
-  }, [props.params]);
+  const isOverlapping = (start: string, end: string) => {
+    const s = formatTime(start);
+    const e = formatTime(end);
 
+    return bookedSlots.some((b) => {
+      return !(e <= b.start || s >= b.end);
+    });
+  };
 
-  // -------------------------------------
-  // LOAD FREE + BOOKED SLOTS
-  // -------------------------------------
+  const endOptions = useMemo(() => {
+    if (!start) return [];
+    const startIndex = availableSlots.findIndex((s) => s.start === start);
+    return availableSlots.slice(startIndex + 1);
+  }, [start, availableSlots]);
+
+  // ----------------------
+  // VERFÜGBARKEIT LADEN
+  // ----------------------
   async function loadAvailability() {
     if (!id || !date) return;
 
-    setSlots([]);
+    setMessage("");
+    setError("");
+    setAvailableSlots([]);
     setBookedSlots([]);
     setStart("");
     setEnd("");
-    setMessage("");
 
-    // 1) freie Slots
+    // 1. freie Slots holen
     const freeRes = await fetch(
-      `http://localhost:4000/rooms/${id}/availability?date=${date}`
+      `http://localhost:4000/rooms/${id}/availability?date=${date}`,
+      { cache: "no-store" }
     );
     const freeData = await freeRes.json();
-    setSlots(freeData.free ?? []);
+    const freeSlots: Slot[] = Array.isArray(freeData.free) ? freeData.free : [];
+    setAvailableSlots(freeSlots);
 
-// 2) gebuchte Slots
-const bookedRes = await fetch(
-  `http://localhost:4000/bookings/by-room-and-date?roomId=${id}&date=${date}`
-);
+    // 2. gebuchte Zeiten holen
+    const bookedRes = await fetch(
+      `http://localhost:4000/bookings/by-room-and-date?roomId=${id}&date=${date}`,
+      { cache: "no-store" }
+    );
 
-// Debug-Ausgabe
-const raw = await bookedRes.json();
-console.log("BOOKED RESPONSE RAW:", raw);
+    const bookedRaw = await bookedRes.json();
 
-// Garantiert immer ein Array
-const bookedData: BookingAPI[] = Array.isArray(raw) ? raw : [];
+    const normalized: Slot[] = Array.isArray(bookedRaw)
+      ? bookedRaw.map((b: BookingAPI) => ({
+          start: b.starts_at.substring(11, 16),
+          end: b.ends_at.substring(11, 16),
+        }))
+      : [];
 
-const normalized = bookedData.map((b) => ({
-  start: b.starts_at.substring(11, 16),
-  end: b.ends_at.substring(11, 16),
-}));
-
-setBookedSlots(normalized);
+    setBookedSlots(normalized);
   }
 
-  // -------------------------------------
-  // OVERLAPPING CHECK (HOOK-SAFE VERSION)
-  // -------------------------------------
-  const error = useMemo(() => {
-    if (!start || !end) return "";
-
-    for (const b of bookedSlots) {
-      const overlaps = !(end <= b.start || start >= b.end);
-      if (overlaps) return "Dieser Zeitraum ist bereits gebucht";
-    }
-
-    return "";
-  }, [start, end, bookedSlots]);
-
-
-  // -------------------------------------
-  // MERGE FREE + BOOKED TIMES
-  // -------------------------------------
-  const allTimes: Slot[] = useMemo(() => {
-    const combined = [...slots, ...bookedSlots];
-    // Duplikate entfernen
-    const unique = new Map<string, Slot>();
-    for (const s of combined) {
-      unique.set(s.start + s.end, s);
-    }
-    return Array.from(unique.values()).sort((a, b) =>
-      a.start.localeCompare(b.start)
-    );
-  }, [slots, bookedSlots]);
-
-
-  // -------------------------------------
-  // BOOKING SEND
-  // -------------------------------------
+  // ----------------------
+  // BUCHEN
+  // ----------------------
   async function book() {
-    if (!id || !start || !end || error) return;
+    if (!start || !end) return;
+
+    setError("");
+    setMessage("");
+
+    if (isOverlapping(start, end)) {
+      setError("Dieser Zeitraum ist bereits gebucht");
+      return;
+    }
 
     const payload = {
       roomId: id,
@@ -126,21 +120,17 @@ setBookedSlots(normalized);
 
     const data = await res.json();
 
-    if (res.ok) setMessage("✔️ Buchung erfolgreich gespeichert!");
-    else setMessage("❌ Fehler: " + (data.error || "Unbekannter Fehler"));
+    if (res.ok) {
+      setMessage("✔️ Buchung erfolgreich gespeichert!");
+      loadAvailability(); // neu laden
+    } else {
+      setError(data.error || "Unbekannter Fehler");
+    }
   }
 
-
-  // -------------------------------------
-  // SAFE EARLY RETURN (AFTER ALL HOOKS)
-  // -------------------------------------
-  if (!id) return <div className="p-10">Wird geladen…</div>;
-
-
-  // -------------------------------------
-  // UI
-  // -------------------------------------
-
+  // ----------------------
+  // RENDER
+  // ----------------------
   const inputCls =
     "w-full h-12 rounded-xl border border-slate-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500";
   const labelCls = "text-sm font-medium text-slate-800";
@@ -162,14 +152,15 @@ setBookedSlots(normalized);
 
         {/* ERROR BANNER */}
         {error && (
-          <div className="border border-red-300 bg-red-50 text-red-600 p-4 rounded-xl mb-6 flex items-center gap-2">
+          <div className="p-4 rounded-xl border border-red-300 bg-red-50 text-red-700 text-center font-medium mb-5">
             ❗ {error}
           </div>
         )}
 
+        {/* FORMULAR */}
         <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-6">
 
-          {/* DATUM */}
+          {/* Datum */}
           <div className={groupCls}>
             <label className={labelCls}>Datum</label>
             <input
@@ -180,6 +171,7 @@ setBookedSlots(normalized);
             />
           </div>
 
+          {/* Verfügbarkeit prüfen */}
           <button
             type="button"
             onClick={loadAvailability}
@@ -188,10 +180,9 @@ setBookedSlots(normalized);
             Verfügbarkeit prüfen
           </button>
 
-          {/* START / END */}
-          {slots.length > 0 && (
+          {/* Startzeit */}
+          {availableSlots.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
               <div className={groupCls}>
                 <label className={labelCls}>Startzeit</label>
                 <select
@@ -200,8 +191,8 @@ setBookedSlots(normalized);
                   onChange={(e) => setStart(e.target.value)}
                 >
                   <option value="">Wählen…</option>
-                  {allTimes.map((s, i) => (
-                    <option key={i} value={s.start}>
+                  {availableSlots.map((s) => (
+                    <option key={s.start} value={s.start}>
                       {s.start}
                     </option>
                   ))}
@@ -217,19 +208,18 @@ setBookedSlots(normalized);
                   disabled={!start}
                 >
                   <option value="">Wählen…</option>
-                  {allTimes.map((s, i) => (
-                    <option key={i} value={s.end}>
+                  {endOptions.map((s) => (
+                    <option key={s.end} value={s.end}>
                       {s.end}
                     </option>
                   ))}
                 </select>
               </div>
-
             </div>
           )}
 
-          {/* PERSONEN */}
-          {slots.length > 0 && (
+          {/* Personen */}
+          {availableSlots.length > 0 && (
             <div className={groupCls}>
               <label className={labelCls}>Anzahl Personen</label>
               <input
@@ -242,8 +232,8 @@ setBookedSlots(normalized);
             </div>
           )}
 
-          {/* ZWECK */}
-          {slots.length > 0 && (
+          {/* Zweck */}
+          {availableSlots.length > 0 && (
             <div className={groupCls}>
               <label className={labelCls}>Zweck (optional)</label>
               <textarea
@@ -255,37 +245,40 @@ setBookedSlots(normalized);
             </div>
           )}
 
-          {/* BOOKED TIMES */}
+          {/* Gebuchte Zeiten Box */}
           {bookedSlots.length > 0 && (
-            <div className="mt-3 p-5 rounded-2xl border border-slate-200 bg-blue-50">
-              <div className="flex items-center gap-2 mb-2 text-slate-800">
-                🕒
-                <h3 className="font-semibold text-xl">
-                  Gebuchte Zeiten am {new Date(date).toLocaleDateString("de-DE")}:
-                </h3>
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 mt-3">
+              <div className="flex items-center gap-2 text-blue-700 font-semibold mb-3">
+                ⏰ Gebuchte Zeiten am {date}:
               </div>
 
-              {bookedSlots.map((s, i) => (
-                <p key={i} className="text-slate-700 text-lg">
-                  {s.start} – {s.end}
-                </p>
+              {bookedSlots.map((b, i) => (
+                <div key={i} className="text-blue-900 text-lg">
+                  {b.start} – {b.end}
+                </div>
               ))}
             </div>
           )}
 
-          {/* BUCHEN BUTTON */}
-          {slots.length > 0 && (
+          {/* Buchungsbutton */}
+          {availableSlots.length > 0 && (
             <button
               type="button"
               onClick={book}
-              disabled={!start || !end || !!error}
-              className="h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-semibold shadow hover:opacity-90 disabled:opacity-40 transition"
+              disabled={!start || !end}
+              className="h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-semibold shadow hover:opacity-90 disabled:opacity-40 transition mt-6"
             >
               Jetzt buchen
             </button>
           )}
 
-          {message && <div className="mt-3 text-sm text-slate-700">{message}</div>}
+          {/* Success Message */}
+          {message && (
+            <div className="text-green-700 font-medium text-center mt-3">
+              {message}
+            </div>
+          )}
+
         </form>
       </div>
     </div>
