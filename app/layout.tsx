@@ -7,6 +7,7 @@ import { useEffect, useState, useCallback } from "react";
 import { isLoggedIn, getCurrentUser, logout } from "@/lib/auth";
 const PUBLIC_ROUTES = ["/login", "/register"];
 
+
 export default function RootLayout({
   children,
 }: {
