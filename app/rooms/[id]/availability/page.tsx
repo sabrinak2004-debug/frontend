@@ -56,6 +56,8 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
       `http://localhost:4000/bookings/by-room-and-date?roomId=${id}&date=${date}`
     );
     const bookedData: BookingAPI[] = await bookedRes.json();
+    console.log("BOOKED RESPONSE:", bookedData);
+
 
     const normalized = bookedData.map((b) => ({
       start: b.starts_at.substring(11, 16),
