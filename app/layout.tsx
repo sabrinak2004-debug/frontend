@@ -14,7 +14,7 @@ export default function RootLayout({
   const pathname = usePathname();
   const router = useRouter();
 
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ displayName: string; email: string } | null>(null);
 
   // Login-Redirect + User laden
   useEffect(() => {
@@ -51,12 +51,12 @@ export default function RootLayout({
         ) : (
           <>
             {/* SIDEBAR */}
-            <aside className="w-72 bg-white px-6 py-8 flex flex-col justify-between shadow-sm border-r">
+            <aside className="w-72 bg-white px-6 py-8 flex flex-col justify-between shadow-sm ">
 
               <div>
                 {/* LOGO */}
                 <div className="flex items-center gap-3 mb-10">
-                  <div className="bg-blue-600 text-white p-3 rounded-xl shadow">
+                  <div className="bg-blue-50 text-white p-3 rounded-xl shadow">
                     📘
                   </div>
                   <div>
@@ -77,7 +77,7 @@ export default function RootLayout({
               </div>
 
               {/* PROFIL UNTERER BEREICH */}
-              <div className="mt-10 border-t pt-4">
+              <div className="mt-10 pt-4">
                 {user ? (
                   <div>
                     <div className="flex items-center gap-3 mb-3">
@@ -85,7 +85,7 @@ export default function RootLayout({
                         👤
                       </div>
                       <div>
-                        <p className="font-medium">{user.name}</p>
+                        <p className="font-medium">{user.displayName}</p>
                         <p className="text-sm text-gray-500">{user.email}</p>
                       </div>
                     </div>

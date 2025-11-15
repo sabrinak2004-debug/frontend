@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { getUserId } from "@/lib/auth";
+
 
 type Slot = { start: string; end: string };
 type BookingAPI = { starts_at: string; ends_at: string };
@@ -18,6 +20,8 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
   const [purpose, setPurpose] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const userId = getUserId();
+
 
   async function loadAvailability() {
     setError("");
@@ -67,7 +71,7 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
 
     const payload = {
       roomId,
-      userId: "703dedca-b5bd-4494-85c7-cfa9576bb6c6",
+      userId: userId!,
       date,
       start,
       end,
