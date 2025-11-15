@@ -87,18 +87,20 @@ export default function RootLayout({
             </div>
 
             {/* NAVIGATION */}
+            <br>  
+            </br>
             <nav className="flex flex-col gap-2">
-              <Link href="/rooms" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50">
-                📅 Alle Räume
+              <Link href="/rooms" className="flex items-center gap-10 px-3 py-2 rounded-lg hover:bg-blue-50 text-xl tracking-wide">
+                📅  Alle Räume
               </Link>
-              <Link href="/my-bookings" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50">
-                ⭐ Meine Buchungen
+              <Link href="/my-bookings" className="flex items-center gap-10 px-3 py-2 rounded-lg hover:bg-blue-50 text-xl tracking-wide">
+                ⭐  Meine Buchungen
               </Link>
             </nav>
 
             {/* ÖFFNUNGSZEITEN */}
             <div className="mt-10">
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+              <h2 className="text-s font-semibold text-gray-500 uppercase tracking-wide mb-3">
                 Öffnungszeiten
               </h2>
 
