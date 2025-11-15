@@ -51,22 +51,25 @@ export default function AvailabilityPage(props: { params: Promise<{ id: string }
     const freeData = await freeRes.json();
     setSlots(freeData.free ?? []);
 
-    // 2) gebuchte Slots
-    const bookedRes = await fetch(
-      `http://localhost:4000/bookings/by-room-and-date?roomId=${id}&date=${date}`
-    );
-    const bookedData: BookingAPI[] = await bookedRes.json();
-    console.log("BOOKED RESPONSE:", bookedData);
+// 2) gebuchte Slots
+const bookedRes = await fetch(
+  `http://localhost:4000/bookings/by-room-and-date?roomId=${id}&date=${date}`
+);
 
+// Debug-Ausgabe
+const raw = await bookedRes.json();
+console.log("BOOKED RESPONSE RAW:", raw);
 
-    const normalized = bookedData.map((b) => ({
-      start: b.starts_at.substring(11, 16),
-      end: b.ends_at.substring(11, 16),
-    }));
+// Garantiert immer ein Array
+const bookedData: BookingAPI[] = Array.isArray(raw) ? raw : [];
 
-    setBookedSlots(normalized);
+const normalized = bookedData.map((b) => ({
+  start: b.starts_at.substring(11, 16),
+  end: b.ends_at.substring(11, 16),
+}));
+
+setBookedSlots(normalized);
   }
-
 
   // -------------------------------------
   // OVERLAPPING CHECK (HOOK-SAFE VERSION)
