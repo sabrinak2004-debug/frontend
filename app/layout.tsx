@@ -83,19 +83,18 @@ export default function RootLayout({
               </div>
               <div>
                 <h1 className="text-lg font-bold">Zentralbibliothek</h1>
-                <p className="text-xs text-gray-500">Universität Hohenheim</p>
+                <p className="text-sm text-gray-500">Universität Hohenheim</p>
               </div>
             </div>
 
             {/* NAVIGATION */}
-            <br>  
-            </br>
+            <br></br>
             <nav className="flex flex-col gap-2">
               <Link href="/rooms" className="flex items-center gap-10 px-3 py-2 rounded-lg hover:bg-blue-50 text-xl tracking-wide">
-                📅  Alle Räume
+                 📁 &nbsp; Alle Räume
               </Link>
               <Link href="/my-bookings" className="flex items-center gap-10 px-3 py-2 rounded-lg hover:bg-blue-50 text-xl tracking-wide">
-                ⭐  Meine Buchungen
+                🗒 &nbsp; Meine Buchungen
               </Link>
             </nav>
 
@@ -107,7 +106,7 @@ export default function RootLayout({
 
               <div className="mb-4">
                 <div className="flex items-center gap-2 text-gray-700 font-medium">
-                  🕒 Ausleihe & Räume
+                  🕒 &nbsp;Ausleihe & Räume
                 </div>
                 <p className="text-sm text-gray-600 ml-7 mt-1 leading-tight">
                   Mo–Fr: 08:00 – 21:00<br />
@@ -117,7 +116,7 @@ export default function RootLayout({
 
               <div className="mb-4">
                 <div className="flex items-center gap-2 text-gray-700 font-medium">
-                  📞 Auskunft
+                  📞 &nbsp;Auskunft
                 </div>
                 <p className="text-sm text-gray-600 ml-7 mt-1 leading-tight">
                   Mo–Fr: 09:00 – 17:00<br />
@@ -136,7 +135,7 @@ export default function RootLayout({
             {user ? (
               <div>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-blue-100 rounded-full text-lg">
+                  <div className="p-2 bg-blue-100 rounded-xl text-3xl">
                     👤
                   </div>
                   <div>
@@ -146,7 +145,7 @@ export default function RootLayout({
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="text-red-600 text-sm hover:underline"
+                  className="text-sm hover:underline text-lg text-red-600"
                 >
                   Abmelden
                 </button>
