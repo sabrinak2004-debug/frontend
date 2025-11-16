@@ -26,7 +26,7 @@ export default function RegisterPage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 text-2xl mb-3">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 text-4xl mb-3">
             📝
           </div>
           <h1 className="text-3xl font-bold text-slate-900">Registrieren</h1>
