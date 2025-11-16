@@ -147,8 +147,11 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
         <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
           📅
         </div>
-        <h2 className="text-2xl font-semibold text-slate-900">Raum buchen</h2>
-      </div>
+        <h1 className="text-xl font-semibold text-slate-900">Raum buchen</h1>
+        <br></br>
+        <h1 className="text-sm text-gray-500">bitte max. 3 std.</h1>
+    
+        </div>
 
       {/* ERROR */}
       {error && (
