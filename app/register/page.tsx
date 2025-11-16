@@ -13,7 +13,7 @@ export default function RegisterPage() {
 
   async function handleRegister() {
     try {
-      await register(email, password, name);
+      await register(email, password,name);
       router.push("/rooms");
     } catch {
       setError("❌ Registrierung fehlgeschlagen");
