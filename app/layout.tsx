@@ -79,7 +79,7 @@ export default function RootLayout({
             {/* LOGO */}
             <div className="flex items-center gap-3 mb-10">
               <div className="p-3 rounded-2xl shadow bg-gradient-to-br from-blue-100 to-indigo-400 text-white text-4xl">
-                🎓
+                 📖
               </div>
               <div>
                 <h1 className="text-lg font-bold">Zentralbibliothek</h1>
@@ -91,7 +91,7 @@ export default function RootLayout({
             <br></br>
             <nav className="flex flex-col gap-2">
               <Link href="/rooms" className="flex items-center gap-10 px-3 py-2 rounded-lg hover:bg-blue-50 text-xl tracking-wide">
-                 📁 &nbsp; Alle Räume
+                  🏫 &nbsp; Alle Räume
               </Link>
               <Link href="/my-bookings" className="flex items-center gap-10 px-3 py-2 rounded-lg hover:bg-blue-50 text-xl tracking-wide">
                 🗒 &nbsp; Meine Buchungen
