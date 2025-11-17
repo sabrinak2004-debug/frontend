@@ -1,5 +1,5 @@
 // /lib/auth.ts
-const BASE_URL = "https://hohenheim-booking-app.onrender.com";
+const API = process.env.NEXT_PUBLIC_API_URL!;
 
 export function saveToken(token: string) {
   if (typeof window !== "undefined") {
@@ -35,7 +35,7 @@ export async function getCurrentUser() {
   const token = getToken();
   if (!token) return null;
 
-  const res = await fetch(`${BASE_URL}/me`, {
+  const res = await fetch(`${API}/me`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -45,7 +45,7 @@ export async function getCurrentUser() {
 }
 
 export async function login(email: string, password: string) {
-  const res = await fetch(`${BASE_URL}/auth/login`, {
+  const res = await fetch(`${API}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -62,7 +62,7 @@ export async function login(email: string, password: string) {
 }
 
 export async function register(email: string, password: string, displayName: string) {
-  const res = await fetch(`${BASE_URL}/auth/register`, {
+  const res = await fetch(`${API}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password, displayName }),

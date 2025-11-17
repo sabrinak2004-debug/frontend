@@ -30,7 +30,7 @@ export default function MyBookingsPage() {
 
     try {
       const res = await fetch(
-        `${BASE_URL}/bookings/me?userId=${userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/bookings/me?userId=${userId}`,
         { cache: "no-store" }
       );
 
@@ -77,7 +77,7 @@ export default function MyBookingsPage() {
 
   async function cancelBooking(id: string) {
     const res = await fetch(
-      `${BASE_URL}/bookings/${id}/cancel`,
+      `${process.env.NEXT_PUBLIC_API_URL}/bookings/${id}/cancel`,
       { method: "PATCH" }
     );
 
