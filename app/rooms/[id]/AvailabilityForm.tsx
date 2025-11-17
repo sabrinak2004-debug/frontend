@@ -57,14 +57,14 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
 
     // 1) Freie Slots abrufen
     const freeRes = await fetch(
-      `http://localhost:4000//rooms/${roomId}/availability?date=${date}`
+      `${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomId}/availability?date=${date}`
     );
     const freeData = await freeRes.json();
     setSlots(freeData.free || []);
 
     // 2) ALLE Buchungen dieses Raumes an diesem Tag abrufen
     const bookedRes = await fetch(
-      `http://localhost:4000/bookings/by-room-and-date?roomId=${roomId}&date=${date}`
+      `${process.env.NEXT_PUBLIC_API_URL}/bookings/by-room-and-date?roomId=${roomId}&date=${date}`
     );
     const bookedData: BookingAPI[] = await bookedRes.json();
 
@@ -112,7 +112,7 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
       purpose,
     };
 
-    const res = await fetch(`http://localhost:4000//bookings`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
