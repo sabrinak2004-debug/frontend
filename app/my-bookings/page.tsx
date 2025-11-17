@@ -30,7 +30,7 @@ export default function MyBookingsPage() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/bookings/me?userId=${userId}`,
+        `https://hohenheim-booking-app.onrender.com/bookings/me?userId=${userId}`,
         { cache: "no-store" }
       );
 
@@ -77,7 +77,7 @@ export default function MyBookingsPage() {
 
   async function cancelBooking(id: string) {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/bookings/${id}/cancel`,
+      `https://hohenheim-booking-app.onrender.com/bookings/${id}/cancel`,
       { method: "PATCH" }
     );
 

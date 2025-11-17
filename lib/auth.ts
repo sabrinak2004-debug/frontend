@@ -34,7 +34,7 @@ export async function getCurrentUser() {
   const token = getToken();
   if (!token) return null;
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/me`, {
+  const res = await fetch(`https://hohenheim-booking-app.onrender.com/me`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -44,7 +44,7 @@ export async function getCurrentUser() {
 }
 
 export async function login(email: string, password: string) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+  const res = await fetch(`https://hohenheim-booking-app.onrender.com/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -61,7 +61,7 @@ export async function login(email: string, password: string) {
 }
 
 export async function register(email: string, password: string, displayName: string) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
+  const res = await fetch(`https://hohenheim-booking-app.onrender.com/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password, displayName }),

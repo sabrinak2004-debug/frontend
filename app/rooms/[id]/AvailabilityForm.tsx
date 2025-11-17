@@ -57,14 +57,14 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
 
     // 1) Freie Slots abrufen
     const freeRes = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomId}/availability?date=${date}`
+      `https://hohenheim-booking-app.onrender.com/rooms/${roomId}/availability?date=${date}`
     );
     const freeData = await freeRes.json();
     setSlots(freeData.free || []);
 
     // 2) ALLE Buchungen dieses Raumes an diesem Tag abrufen
     const bookedRes = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/bookings/by-room-and-date?roomId=${roomId}&date=${date}`
+      `https://hohenheim-booking-app.onrender.com/bookings/by-room-and-date?roomId=${roomId}&date=${date}`
     );
     const bookedData: BookingAPI[] = await bookedRes.json();
 
