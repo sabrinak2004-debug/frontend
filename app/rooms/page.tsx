@@ -20,7 +20,7 @@ export default function RoomsPage() {
   // Räume laden
   useEffect(() => {
     async function loadRooms() {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
+      const res = await fetch(`http://localhost:4000/rooms`, {
         cache: "no-store",
       });
 

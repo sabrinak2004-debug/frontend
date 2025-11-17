@@ -21,7 +21,7 @@ export default async function RoomDetailPage({
   const { id } = await params;
 
   // Raumdaten laden
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${id}`, {
+  const res = await fetch(`http://localhost:4000//rooms/${id}`, {
     cache: "no-store",
   });
 
