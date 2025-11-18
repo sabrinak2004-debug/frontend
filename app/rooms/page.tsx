@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { API } from "@/lib/auth";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 type Room = {
   id: string;
@@ -21,7 +22,7 @@ export default function RoomsPage() {
   // Räume laden
   useEffect(() => {
     async function loadRooms() {
-      const res = await fetch(`${API}/rooms`, {
+      const res = await fetch(`${API_URL}/rooms`, {
         cache: "no-store",
       });
 
