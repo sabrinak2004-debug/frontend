@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { getUserId } from "@/lib/auth";
+import { API } from "@/lib/auth";
+
 
 type Slot = { start: string; end: string };
 type BookingAPI = { starts_at: string; ends_at: string };

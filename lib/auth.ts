@@ -1,5 +1,5 @@
 // /lib/auth.ts
-const API = process.env.NEXT_PUBLIC_API_URL!;
+export const API = process.env.NEXT_PUBLIC_API_URL!;
 
 export function saveToken(token: string) {
   if (typeof window !== "undefined") {

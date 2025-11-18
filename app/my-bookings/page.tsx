@@ -2,6 +2,8 @@
 
 import { getUserId } from "@/lib/auth";
 import { useEffect, useState, useCallback } from "react";
+import { API } from "@/lib/auth";
+
 
 type Booking = {
   id: string;

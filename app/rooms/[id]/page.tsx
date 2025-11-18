@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import AvailabilityForm from "./AvailabilityForm";
+import { API } from "@/lib/auth";
+
 
 type Room = {
   id: string;

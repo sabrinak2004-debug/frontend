@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { API } from "@/lib/auth";
 
 type Room = {
   id: string;
