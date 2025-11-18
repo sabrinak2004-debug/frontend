@@ -78,7 +78,7 @@ export default function MyBookingsPage() {
   async function cancelBooking(id: string) {
     const res = await fetch(
       `${API}/bookings/${id}/cancel`,
-      { method: "PATCH" }
+      { method: "GET" }
     );
 
     if (!res.ok) {
