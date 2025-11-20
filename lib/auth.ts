@@ -62,7 +62,11 @@ export async function login(email: string, password: string) {
   return data;
 }
 
-export async function register(email: string, password: string, displayName: string) {
+export async function register(
+  email: string,
+  password: string,
+  displayName: string
+) {
   const res = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
