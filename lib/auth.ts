@@ -47,7 +47,7 @@ export async function getCurrentUser() {
 
 export async function login(email: string, password: string) {
   const res = await fetch(`${API_URL}/auth/login`, {
-    method: "GET",
+    method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
@@ -64,7 +64,7 @@ export async function login(email: string, password: string) {
 
 export async function register(email: string, password: string, displayName: string) {
   const res = await fetch(`${API_URL}/auth/register`, {
-    method: "GET",
+    method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password, displayName }),
   });
