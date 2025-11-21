@@ -115,7 +115,7 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
     };
 
     const res = await fetch(`${API}/bookings`, {
-      method: "GET",
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
