@@ -108,8 +108,8 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
       roomId,
       userId,
       date,
-      start,
-      end,
+      starts_at: start,
+      ends_at: end,
       peopleCount: people,
       purpose,
     };
