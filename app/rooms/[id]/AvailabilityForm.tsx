@@ -105,14 +105,15 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
     }
 
     const payload = {
-      room_id: roomId,
-      user_id: userId,
-      date,
-      starts_at: start,
-      ends_at: end,
-      people_count: people,
-      purpose,
-    };
+      roomId: roomId,
+      userId: userId,
+      date: date,
+      start: start,
+      end: end,
+      peopleCount: people,
+      purpose: purpose ?? "",
+};
+
 
     const res = await fetch(`${API}/bookings`, {
       method: "POST",
