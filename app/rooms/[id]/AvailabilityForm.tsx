@@ -105,12 +105,12 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
     }
 
     const payload = {
-      roomId,
-      userId,
+      room_id: roomId,
+      user_id: userId,
       date,
       starts_at: start,
       ends_at: end,
-      peopleCount: people,
+      people_count: people,
       purpose,
     };
 
