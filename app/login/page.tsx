@@ -11,27 +11,24 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleLogin() {
-    setError("");
+async function handleLogin() {
+  setError("");
 
-    try {
-      const res = await login(email, password);
+  const result = await login(email, password);
 
-      // Wenn Backend Fehler liefert:
-      if (res?.error === "Benutzer existiert nicht") {
-        setError("❌ Es existiert kein Konto mit dieser E-Mail.");
-        return;
-      }
-      if (res?.error === "Falsches Passwort") {
-        setError("❌ Das eingegebene Passwort ist falsch.");
-        return;
-      }
-
-      router.push("/rooms");
-    } catch {
+  if (!result.ok) {
+    if (result.data.error === "Benutzer existiert nicht") {
+      setError("❌ Es existiert kein Konto mit dieser E-Mail.");
+    } else if (result.data.error === "Falsches Passwort") {
+      setError("❌ Das eingegebene Passwort ist falsch.");
+    } else {
       setError("❌ Login fehlgeschlagen.");
     }
+    return;
   }
+
+  router.push("/rooms");
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-50 p-6">

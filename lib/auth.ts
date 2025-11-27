@@ -53,14 +53,14 @@ export async function login(email: string, password: string) {
   });
 
   const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error || "Login fehlgeschlagen");
-  }
-
-  saveToken(data.token);
-  return data;
+  
+  // ❗ NICHT throwen, sondern Ergebnis zurückgeben
+  return {
+    ok: res.ok,
+    data,
+  };
 }
+
 
 export async function register(
   email: string,
