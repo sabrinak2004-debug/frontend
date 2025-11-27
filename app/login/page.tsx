@@ -8,14 +8,28 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
   async function handleLogin() {
+    setError("");
+
     try {
-      await login(email, password);
+      const res = await login(email, password);
+
+      // Wenn Backend Fehler liefert:
+      if (res?.error === "Benutzer existiert nicht") {
+        setError("❌ Es existiert kein Konto mit dieser E-Mail.");
+        return;
+      }
+      if (res?.error === "Falsches Passwort") {
+        setError("❌ Das eingegebene Passwort ist falsch.");
+        return;
+      }
+
       router.push("/rooms");
     } catch {
-      setError("❌ Login fehlgeschlagen");
+      setError("❌ Login fehlgeschlagen.");
     }
   }
 
@@ -53,13 +67,25 @@ export default function LoginPage() {
 
           <div>
             <label className="text-sm font-medium text-slate-700">Passwort</label>
-            <input
-              type="password"
-              placeholder="Passwort"
-              className="mt-1 w-full h-12 px-4 border rounded-xl border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Passwort"
+                className="mt-1 w-full h-12 px-4 border rounded-xl border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+
+              {/* Passwort anzeigen / verbergen */}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"
+              >
+                {showPassword ? "🙈 Verbergen" : "👁️ Anzeigen"}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -82,3 +108,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
