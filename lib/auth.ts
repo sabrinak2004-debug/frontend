@@ -2,11 +2,6 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export const API = API_URL!;
 
-export function isLoggedInSafe() {
-  if (typeof window === "undefined") return null;
-  return !!localStorage.getItem("token");
-}
-
 
 export function saveToken(token: string) {
   if (typeof window !== "undefined") {
