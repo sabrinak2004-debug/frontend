@@ -119,7 +119,7 @@ export default function RootLayout({
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
             px-4 md:px-6 py-4 md:py-8
             flex flex-col justify-between
-            border-b border-gray-200 md:border-b-0 md:border-r
+            border-b-0 md:border-r
             `}
         >
 
@@ -192,7 +192,7 @@ export default function RootLayout({
           </div>
 
           {/* PROFILBEREICH */}
-          <div className="pt-4 border-t border-white/30 backdrop-blur-sm mt-4 md:mt-6 md:border-t-0">
+          <div className="pt-4 border-t border-gray-200 mt-4 md:mt-6 md:border-t-0">
             {user ? (
               <div>
                 <div className="flex items-center gap-3 mb-3">
