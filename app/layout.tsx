@@ -119,7 +119,7 @@ export default function RootLayout({
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
             px-4 md:px-6 py-4 md:py-8
             flex flex-col justify-between
-            border-b border-white/20 backdrop-blur-sm md:border-b-0 md:border-r
+            border-b border-gray-200 md:border-b-0 md:border-r
             `}
         >
 
