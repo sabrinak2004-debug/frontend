@@ -29,11 +29,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // REDIRECT – nur, wenn clientseitig + AuthStatus sicher bestimmt
   // ------------------------------------------------------------
   useEffect(() => {
-    if (!PUBLIC_ROUTES.includes(pathname) && !isLoggedIn()) {
+    if (!isClient) return;
+    if (authStatus === false && !PUBLIC_ROUTES.includes(pathname)) {
       router.replace("/login");
     }
-}, [pathname, router]);
-
+  }, [isClient, authStatus, pathname, router]);
 
   // ------------------------------------------------------------
   // USER LADEN NUR NACH Login
