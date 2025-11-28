@@ -26,6 +26,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // ------------------------------------------------------------
+  // REDIRECT – nur, wenn clientseitig + AuthStatus sicher bestimmt
+  // ------------------------------------------------------------
+  useEffect(() => {
+    if (!PUBLIC_ROUTES.includes(pathname) && !isLoggedIn()) {
+      router.replace("/login");
+    }
+}, [pathname, router]);
+
+
+  // ------------------------------------------------------------
   // USER LADEN NUR NACH Login
   // ------------------------------------------------------------
   useEffect(() => {
