@@ -192,7 +192,7 @@ export default function RootLayout({
           </div>
 
           {/* PROFILBEREICH */}
-          <div className="pt-4 border-t mt-4 md:mt-6 md:border-t-0">
+          <div className="pt-4 border mt-4 md:mt-6 md:border-t-0">
             {user ? (
               <div>
                 <div className="flex items-center gap-3 mb-3">
