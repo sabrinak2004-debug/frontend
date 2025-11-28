@@ -3,71 +3,77 @@
 import "./globals.css";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { isLoggedIn, getCurrentUser, logout } from "@/lib/auth";
 
 const PUBLIC_ROUTES = ["/", "/login", "/register"];
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const isClient = typeof window !== "undefined";   // ⭐ Der wichtigste Fix
+
+  // AuthStatus lazy berechnen – KEIN useEffect → KEINE Fehler
+  const [authStatus] = useState<null | boolean>(() => {
+    if (!isClient) return null;
+    return isLoggedIn();
+  });
 
   const [user, setUser] =
     useState<{ displayName: string; email: string } | null>(null);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const isAuthPage = PUBLIC_ROUTES.includes(pathname);
-
-  // -----------------------------------------------
-  // AUTH REDIRECT
-  // -----------------------------------------------
-  const checkAuth = useCallback(() => {
-    if (!PUBLIC_ROUTES.includes(pathname) && !isLoggedIn()) {
+  // ------------------------------------------------------------
+  // REDIRECT – nur, wenn clientseitig + AuthStatus sicher bestimmt
+  // ------------------------------------------------------------
+  useEffect(() => {
+    if (!isClient) return;
+    if (authStatus === false && !PUBLIC_ROUTES.includes(pathname)) {
       router.replace("/login");
     }
-  }, [pathname, router]);
+  }, [isClient, authStatus, pathname, router]);
 
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
-  // -----------------------------------------------
-  // USER LADEN
-  // -----------------------------------------------
+  // ------------------------------------------------------------
+  // USER LADEN NUR NACH Login
+  // ------------------------------------------------------------
   useEffect(() => {
     async function loadUser() {
-      if (!PUBLIC_ROUTES.includes(pathname) && isLoggedIn()) {
+      if (authStatus === true && !PUBLIC_ROUTES.includes(pathname)) {
         const u = await getCurrentUser();
         setUser(u);
       }
     }
     loadUser();
-  }, [pathname]);
+  }, [authStatus, pathname]);
 
+  // ------------------------------------------------------------
+  // LOADING SCREEN
+  // ------------------------------------------------------------
+  if (!isClient || authStatus === null) {
+    return (
+      <html lang="de">
+        <body className="flex items-center justify-center h-screen text-gray-600">
+          Lädt ...
+        </body>
+      </html>
+    );
+  }
+
+  // Logout
   function handleLogout() {
     logout();
     setUser(null);
     router.replace("/login");
   }
 
-  // -----------------------------------------------
-  // LOGIN / REGISTER LAYOUT OHNE SIDEBAR
-  // -----------------------------------------------
-  if (isAuthPage) {
+  // ------------------------------------------------------------
+  // LOGIN/REGISTER OHNE SIDEBAR
+  // ------------------------------------------------------------
+  if (PUBLIC_ROUTES.includes(pathname)) {
     return (
       <html lang="de">
-        <head>
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1"
-          />
-          <title>Hohenheim Gruppenräume</title>
-        </head>
         <body className="bg-white min-h-screen">
           <main>{children}</main>
         </body>
@@ -75,22 +81,14 @@ export default function RootLayout({
     );
   }
 
-  // -----------------------------------------------
+  // ------------------------------------------------------------
   // HAUPT-LAYOUT MIT SIDEBAR
-  // -----------------------------------------------
+  // ------------------------------------------------------------
   return (
     <html lang="de">
-      <head>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1"
-        />
-        <title>Hohenheim Gruppenräume</title>
-      </head>
-
       <body className="bg-white min-h-screen flex flex-col md:flex-row relative">
 
-        {/* Hamburger Button (nur mobil) */}
+        {/* Hamburger Button */}
         <button
           className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white shadow rounded-lg"
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -98,7 +96,7 @@ export default function RootLayout({
           {sidebarOpen ? "✖️" : "☰"}
         </button>
 
-        {/* Overlay (mobil) */}
+        {/* Overlay */}
         {sidebarOpen && (
           <div
             onClick={() => setSidebarOpen(false)}
@@ -106,7 +104,7 @@ export default function RootLayout({
           ></div>
         )}
 
-        {/* SIDEBAR */}
+        {/* Sidebar */}
         <aside
           className={`
             fixed md:static
@@ -120,9 +118,8 @@ export default function RootLayout({
             px-4 md:px-6 py-4 md:py-8
             flex flex-col justify-between
             border-b-0 md:border-r
-            `}
+          `}
         >
-
           {/* OBERER BEREICH */}
           <div>
 
