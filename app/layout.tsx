@@ -102,7 +102,7 @@ export default function RootLayout({
         {sidebarOpen && (
           <div
             onClick={() => setSidebarOpen(false)}
-            className="fixed inset-0 bg-black bg-opacity-10 md:hidden z-40"
+            className="fixed inset-0 bg-white/40 backdrop-blur-sm md:hidden z-30"
           ></div>
         )}
 
