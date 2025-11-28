@@ -4,7 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { isLoggedIn, getCurrentUser, logout } from "@/lib/auth";
+import { isLoggedInSafe, getCurrentUser, logout } from "@/lib/auth";
 
 const PUBLIC_ROUTES = ["/", "/login", "/register"];
 
@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // Auth nur einmal beim Client berechnen
   const [authStatus] = useState<null | boolean>(() => {
     if (!isClient) return null;
-    return isLoggedIn();
+    return isLoggedInSafe();
   });
 
   const [user, setUser] = useState<{ displayName: string; email: string } | null>(null);
