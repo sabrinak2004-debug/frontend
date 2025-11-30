@@ -205,7 +205,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </aside>
 
         {/* MAIN CONTENT – SCROLLBAR */}
-        <main className="flex-1 flex flex-col">
+        <main className="md:ml-72 p-4 md:p-10 min-h-screen bg-blue-50">
           {children}
         </main>
       </body>
