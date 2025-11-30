@@ -174,7 +174,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </p>
               </div>
 
-              <p className="text-xs text-gray-400 ml-1">An Feiertagen geschlossen</p>
+              <p className="text-xs text-gray-400 ml-1">An gesetzlichen Feiertagen geschlossen</p>
             </div>
           </div>
 

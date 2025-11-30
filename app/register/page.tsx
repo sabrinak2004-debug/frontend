@@ -4,85 +4,137 @@ import { useState } from "react";
 import { register } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
+import {
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  AlertCircle,
+} from "lucide-react";
+
 export default function RegisterPage() {
   const router = useRouter();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleRegister() {
+    setError("");
+    setLoading(true);
+
     try {
-      await register(email, password,name);
+      await register(email, password, name);
       router.push("/rooms");
-    } catch {
-      setError("❌ Registrierung fehlgeschlagen");
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Registrierung fehlgeschlagen.";
+      setError(errorMessage);
     }
+
+    setLoading(false);
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-50 p-6">
       <div className="bg-white shadow-xl border border-slate-200 rounded-3xl p-10 w-full max-w-md">
 
-        {/* Header */}
+        {/* HEADER */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 text-4xl mb-3">
-            📝
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-100 text-blue-600 mb-4">
+            <User className="w-8 h-8" />
           </div>
           <h1 className="text-3xl font-bold text-slate-900">Registrieren</h1>
           <p className="text-slate-500 mt-2">Neues Konto erstellen</p>
         </div>
 
+        {/* ERROR */}
         {error && (
-          <div className="mb-4 text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 text-sm font-medium">
-            {error}
+          <div className="flex items-start gap-2 mb-5 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700">
+            <AlertCircle className="w-5 h-5 mt-0.5" />
+            <span className="text-sm font-medium">{error}</span>
           </div>
         )}
 
-        {/* Inputs */}
-        <div className="space-y-5">
+        {/* FORM */}
+        <div className="space-y-6">
+
+          {/* NAME */}
           <div>
-            <label className="text-sm font-medium text-slate-700">Name</label>
-            <input
-              placeholder="Vor- und Nachname"
-              className="mt-1 w-full h-12 px-4 border rounded-xl border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+            <label className="text-sm font-medium text-slate-800">Name</label>
+            <div className="mt-1 relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Vor- und Nachname"
+                className="w-full h-12 rounded-xl border border-slate-300 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
           </div>
 
+          {/* EMAIL */}
           <div>
-            <label className="text-sm font-medium text-slate-700">E-Mail</label>
-            <input
-              type="email"
-              placeholder="Uni-Hohenheim E-Mail"
-              className="mt-1 w-full h-12 px-4 border rounded-xl border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <label className="text-sm font-medium text-slate-800">E-Mail</label>
+            <div className="mt-1 relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="email"
+                placeholder="Uni-Hohenheim E-Mail"
+                className="w-full h-12 rounded-xl border border-slate-300 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
           </div>
 
+          {/* PASSWORD */}
           <div>
-            <label className="text-sm font-medium text-slate-700">Passwort</label>
-            <input
-              type="password"
-              placeholder="Passwort"
-              className="mt-1 w-full h-12 px-4 border rounded-xl border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <label className="text-sm font-medium text-slate-800">Passwort</label>
+            <div className="mt-1 relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Passwort"
+                className="w-full h-12 rounded-xl border border-slate-300 pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Button */}
+        {/* BUTTON */}
         <button
           onClick={handleRegister}
-          className="mt-8 w-full h-12 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold shadow hover:opacity-90 transition"
+          disabled={loading}
+          className={`mt-8 w-full h-12 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold shadow transition ${
+            loading ? "opacity-60 cursor-not-allowed" : "hover:opacity-90"
+          }`}
         >
-          Registrieren
+          {loading ? "Wird erstellt…" : "Registrieren"}
         </button>
 
-        {/* Link */}
+        {/* LINK */}
         <p className="text-center mt-6 text-sm text-slate-600">
           Schon ein Konto?{" "}
           <a href="/login" className="text-indigo-600 font-semibold hover:underline">
