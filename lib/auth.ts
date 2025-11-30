@@ -18,12 +18,6 @@ export function isLoggedIn(): boolean {
   return !!getToken();
 }
 
-export function isLoggedInSafe() {
-  if (typeof window === "undefined") return null;
-  return !!localStorage.getItem("token");
-}
-
-
 export function logout() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("token");
@@ -61,7 +55,11 @@ export async function login(email: string, password: string) {
 
   const data = await res.json();
 
-  // ❗ NICHT throwen, sondern Ergebnis zurückgeben
+  if (res.ok && data.token) {
+    // ⭐ Token speichern
+    saveToken(data.token);
+  }
+
   return {
     ok: res.ok,
     data,
