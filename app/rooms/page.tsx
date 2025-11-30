@@ -60,7 +60,7 @@ export default function RoomsPage() {
       <div className="mb-8">
         <input
           type="text"
-          placeholder="Raum suchen..."
+          placeholder="🔍 Raum suchen..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full rounded-xl px-4 py-3 shadow-sm"
