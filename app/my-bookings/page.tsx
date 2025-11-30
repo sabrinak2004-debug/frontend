@@ -66,25 +66,29 @@ export default function MyBookingsPage() {
     );
   }
 
-  const today = new Date();
+  function getBookingDateTime(dateStr: string, timeStr: string) {
+  const d = new Date(dateStr);
+  const t = new Date(timeStr);
 
-  const parse = (d: string) => new Date(d);
+  // Uhrzeit in das Datum übernehmen
+  d.setHours(t.getHours(), t.getMinutes(), 0, 0);
 
-  // -----------------------------
-  // Kategorien
-  // -----------------------------
+  return d;
+}
+const now = new Date();
 
-  const upcoming = bookings.filter(
-    (b) => b.status === "confirmed" && parse(b.date) >= today
-  );
+const upcoming = bookings.filter((b) => {
+  const start = getBookingDateTime(b.date, b.starts_at);
+  return start > now && b.status !== "cancelled";
+});
 
-  const cancelled = bookings.filter((b) => b.status === "cancelled");
+const past = bookings.filter((b) => {
+  const end = getBookingDateTime(b.date, b.ends_at);
+  return end < now && b.status !== "cancelled";
+});
 
-  const past = bookings.filter(
-    (b) =>
-      b.status !== "cancelled" && // oder wenn du ALLE willst: einfach entfernen
-      parse(b.date) < today
-  );
+const cancelled = bookings.filter((b) => b.status === "cancelled");
+
 
   // -----------------------------
   // Formatierung
