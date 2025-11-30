@@ -75,7 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // ---------------------------
   return (
     <html lang="de">
-      <body className="bg-[#f3f6ff] min-h-screen">
+      <body className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
 
         {/* MOBILE HAMBURGER */}
         <button
