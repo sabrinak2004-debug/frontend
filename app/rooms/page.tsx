@@ -90,7 +90,7 @@ export default function RoomsPage() {
 
               {/* Kapazität */}
               <div className="absolute top-3 right-3 bg-white shadow-sm text-gray-700 text-sm px-3 py-1 rounded-lg flex items-center gap-1">
-                <Users className="w-4 h-4" /> {room.capacity}
+                <Users className="w-4 h-4" /> {room.capacity} Personen
               </div>
             </div>
 
