@@ -156,7 +156,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
               <div className="mb-4">
                 <div className="flex items-center gap-2 text-gray-700 font-medium">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-4 h-4 text-blue-600" />
                   <span>Ausleihe & Räume</span>
                 </div>
                 <p className="text-sm text-gray-500 ml-6 mt-1">
