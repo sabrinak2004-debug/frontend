@@ -112,7 +112,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div>
             {/* Logo */}
             <div className="flex items-center gap-3 mb-10">
-              <div className="p-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg mb-10">
+              <div className="p-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg">
                 <BookOpen className="w-7 h-7 text-white" />
               </div>
               <div>
