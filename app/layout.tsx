@@ -63,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   if (isAuthPage) {
     return (
       <html lang="de">
-        <body className="bg-gray-500 min-h-screen">
+        <body className="bg-gray-100 min-h-screen">
           <main>{children}</main>
         </body>
       </html>
@@ -75,7 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // ---------------------------
   return (
     <html lang="de">
-      <body className="bg-white">
+      <body className="bg-gray-100 min-h-screen">
 
         {/* MOBILE HAMBURGER */}
         <button
@@ -205,7 +205,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </aside>
 
         {/* MAIN CONTENT – SCROLLBAR */}
-        <main className="md:ml-72 p-4 md:p-10 min-h-screen">
+        <main className="md:ml-72 p-4 md:p-10 min-h-screen bg-gray-100">
           {children}
         </main>
       </body>
