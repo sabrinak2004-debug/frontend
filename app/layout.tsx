@@ -75,7 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // ---------------------------
   return (
     <html lang="de">
-      <body className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <body className="bg-[#f7f9ff]">
 
         {/* MOBILE HAMBURGER */}
         <button
@@ -205,7 +205,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </aside>
 
         {/* MAIN CONTENT – SCROLLBAR */}
-        <main className="md:ml-72 p-4 md:p-10 min-h-screen bg-[#f3f6ff]">
+        <main className="md:ml-72 p-4 md:p-10 min-h-screen bg-[#f7f9ff]">
           {children}
         </main>
       </body>
