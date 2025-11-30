@@ -3,7 +3,14 @@
 import { useState, useCallback } from "react";
 import { getUserId } from "@/lib/auth";
 import { API } from "@/lib/auth";
-
+import {
+  CalendarDays,
+  Clock,
+  Users,
+  FileText,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 
 type Slot = { start: string; end: string };
 type BookingAPI = { starts_at: string; ends_at: string };
@@ -27,16 +34,16 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
   const [error, setError] = useState("");
 
   // ----------------------------
-  // 🔹 Zeit in Minuten umrechnen
+  // Helper: Zeit in Minuten
   // ----------------------------
   const toMinutes = (t: string) => {
     const [h, m] = t.split(":").map(Number);
     return h * 60 + m;
   };
 
-  // ------------------------------------
-  // 🔹 Prüfen ob ein Zeitraum überschneidet
-  // ------------------------------------
+  // ----------------------------
+  // Helper: Zeitüberschneidung
+  // ----------------------------
   const isOverlapping = (s: string, e: string) => {
     const sMin = toMinutes(s);
     const eMin = toMinutes(e);
@@ -48,38 +55,38 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
     });
   };
 
-  // -------------------------------------------
-  // 🔹 Verfügbarkeit + Buchungen für den Tag laden
-  // -------------------------------------------
+  // ----------------------------
+  // Verfügbarkeit laden
+  // ----------------------------
   const loadAvailability = useCallback(async () => {
-    setMessage("");
     setError("");
+    setMessage("");
     setStart("");
     setEnd("");
 
-    // 1) Freie Slots abrufen
+    // freie Slots abrufen
     const freeRes = await fetch(
       `${API}/rooms/${roomId}/availability?date=${date}`
     );
     const freeData = await freeRes.json();
     setSlots(freeData.free || []);
 
-    // 2) ALLE Buchungen dieses Raumes an diesem Tag abrufen
+    // bereits gebuchte Slots abrufen
     const bookedRes = await fetch(
       `${API}/bookings/by-room-and-date?roomId=${roomId}&date=${date}`
     );
     const bookedData: BookingAPI[] = await bookedRes.json();
 
-    const normalized = bookedData.map((b) => ({
-      start: b.starts_at.substring(11, 16),
-      end: b.ends_at.substring(11, 16),
-    }));
-
-    setRoomBookings(normalized);
+    setRoomBookings(
+      bookedData.map((b) => ({
+        start: b.starts_at.substring(11, 16),
+        end: b.ends_at.substring(11, 16),
+      }))
+    );
   }, [date, roomId]);
 
   // ----------------------------
-  // 🔹 Endzeiten nach Startzeit
+  // Endzeiten abhängig von Startzeit
   // ----------------------------
   const getEndOptions = () => {
     if (!start) return [];
@@ -88,32 +95,33 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
   };
 
   // ----------------------------
-  // 🔹 Buchungs-Anfrage senden
+  // Buchung senden
   // ----------------------------
   async function book() {
-    if (!start || !end) return;
-
-    if (!userId) {
-      setError("Du bist nicht eingeloggt.");
+    if (!start || !end) {
+      setError("Bitte Start- und Endzeit auswählen.");
       return;
     }
 
-    // Doppelbuchung verhindern
+    if (!userId) {
+      setError("Bitte zuerst einloggen.");
+      return;
+    }
+
     if (isOverlapping(start, end)) {
-      setError("❌ Dieser Zeitraum ist bereits gebucht.");
+      setError("❌ Dieser Zeitraum ist bereits belegt.");
       return;
     }
 
     const payload = {
-      roomId: roomId,
-      userId: userId,
-      date: date,
-      start: start,
-      end: end,
+      roomId,
+      userId,
+      date,
+      start,
+      end,
       peopleCount: people,
-      purpose: purpose ?? "",
-};
-
+      purpose,
+    };
 
     const res = await fetch(`${API}/bookings`, {
       method: "POST",
@@ -132,56 +140,66 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
     loadAvailability();
   }
 
-  // ------------------------------------
-  // 🔹 Styling
-  // ------------------------------------
+  // Styles
   const inputCls =
     "w-full h-12 rounded-xl border border-slate-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500";
-  const labelCls = "text-sm font-medium text-slate-800";
+  const labelCls = "text-sm font-semibold text-slate-800 flex items-center gap-2";
 
-  // ------------------------------------
-  // 🔹 UI Rendering
-  // ------------------------------------
   return (
-    <div className="bg-white p-7 rounded-3xl shadow border border-slate-100 w-full">
+    <div className="bg-white p-7 rounded-2xl shadow-md border border-slate-200">
 
       {/* HEADER */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
-          📅
+      <div className="flex items-center gap-3 mb-7">
+        <div className="h-11 w-11 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+          <CalendarDays className="w-6 h-6" />
         </div>
-        <h1 className="text-xl font-semibold text-slate-900">Raum buchen</h1>    
-        </div>
+        <h2 className="text-2xl font-bold text-slate-900">Raum buchen</h2>
+      </div>
 
-      {/* ERROR */}
+      {/* ERRORS */}
       {error && (
-        <div className="border border-red-300 bg-red-50 text-red-600 p-4 rounded-xl mb-4 text-sm font-medium">
-          ❗ {error}
+        <div className="flex items-start gap-2 mb-4 p-4 rounded-xl border border-red-300 bg-red-50 text-red-700">
+          <AlertCircle className="w-5 h-5 mt-0.5" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* SUCCESS */}
+      {message && (
+        <div className="flex items-start gap-2 mb-4 p-4 rounded-xl border border-green-300 bg-green-50 text-green-700">
+          <CheckCircle2 className="w-5 h-5 mt-0.5" />
+          <span>{message}</span>
         </div>
       )}
 
       {/* DATUM */}
-      <label className={labelCls}>Datum</label>
+      <label className={labelCls}>
+        <CalendarDays className="w-4 h-4" />
+        Datum
+      </label>
       <input
         type="date"
-        className={inputCls}
         value={date}
+        className={inputCls}
         onChange={(e) => setDate(e.target.value)}
       />
 
       <button
-        type="button"
         onClick={loadAvailability}
-        className="mt-4 h-11 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition w-full"
+        type="button"
+        className="mt-4 w-full h-12 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition"
       >
         Verfügbarkeit prüfen
       </button>
 
       {/* START & END ZEIT */}
       {slots.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-7">
           <div>
-            <label className={labelCls}>Startzeit</label>
+            <label className={labelCls}>
+              <Clock className="w-4 h-4" />
+              Startzeit
+            </label>
             <select
               className={inputCls}
               value={start}
@@ -197,12 +215,15 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
           </div>
 
           <div>
-            <label className={labelCls}>Endzeit</label>
+            <label className={labelCls}>
+              <Clock className="w-4 h-4" />
+              Endzeit
+            </label>
             <select
               className={inputCls}
               value={end}
-              onChange={(e) => setEnd(e.target.value)}
               disabled={!start}
+              onChange={(e) => setEnd(e.target.value)}
             >
               <option value="">Wählen…</option>
               {getEndOptions().map((s) => (
@@ -212,20 +233,23 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
               ))}
             </select>
           </div>
-          <p className="text-sm text-gray-500">bitte max. 3 std.</p>
         </div>
       )}
 
       {/* PERSONEN */}
       {slots.length > 0 && (
         <div className="mt-6">
-          <label className={labelCls}>Anzahl Personen</label>
+          <label className={labelCls}>
+            <Users className="w-4 h-4" />
+            Anzahl Personen
+          </label>
+
           <input
             type="number"
             min={1}
-            className={inputCls}
             value={people}
             onChange={(e) => setPeople(Number(e.target.value))}
+            className={inputCls}
           />
         </div>
       )}
@@ -233,11 +257,15 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
       {/* ZWECK */}
       {slots.length > 0 && (
         <div className="mt-6">
-          <label className={labelCls}>Zweck (optional)</label>
+          <label className={labelCls}>
+            <FileText className="w-4 h-4" />
+            Zweck (optional)
+          </label>
+
           <textarea
-            className={`${inputCls} h-28 resize-none`}
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
+            className={`${inputCls} h-28 resize-none`}
           />
         </div>
       )}
@@ -245,32 +273,30 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
       {/* BUCHEN */}
       {slots.length > 0 && (
         <button
-          type="button"
           onClick={book}
-          className="mt-6 h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-semibold shadow hover:opacity-90 transition w-full"
+          type="button"
+          className="mt-8 w-full h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-semibold hover:opacity-90 transition"
         >
           Jetzt buchen
         </button>
       )}
 
-      {/* ALLE BUCHUNGEN DES TAGES */}
+      {/* BEREITS GEBUCHTE ZEITEN */}
       {roomBookings.length > 0 && (
-        <div className="mt-8 p-5 rounded-2xl bg-blue-50 border border-blue-200">
-          <div className="font-semibold text-slate-900">
-            Bereits gebuchte Zeiten am {date}:
-          </div>
+        <div className="mt-8 p-5 rounded-2xl bg-indigo-50 border border-indigo-200">
+          <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+            <Clock className="w-4 h-4 text-indigo-700" />
+            Bereits belegt am {date}:
+          </h3>
 
           <ul className="mt-3 text-slate-700 space-y-1">
             {roomBookings.map((b, i) => (
-              <li key={i}>⏰ {b.start} – {b.end} Uhr</li>
+              <li key={i}>
+                ⏰ {b.start} – {b.end} Uhr
+              </li>
             ))}
           </ul>
         </div>
-      )}
-
-      {/* SUCCESS MESSAGE */}
-      {message && (
-        <div className="mt-4 text-green-700 font-medium">{message}</div>
       )}
     </div>
   );

@@ -2,7 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import AvailabilityForm from "./AvailabilityForm";
 import { API } from "@/lib/auth";
-
+import {
+  ArrowLeft,
+  MapPin,
+  Users,
+  Info,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 
 type Room = {
   id: string;
@@ -19,72 +26,122 @@ export default async function RoomDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Params auflösen
   const { id } = await params;
 
-  // Raumdaten laden
-  const res = await fetch(`${API}/rooms/${id}`, {
-    cache: "no-store",
-  });
+  // Raum laden
+  const res = await fetch(`${API}/rooms/${id}`, { cache: "no-store" });
 
   if (!res.ok) {
     return (
-      <div className="p-10 text-red-600">Fehler beim Laden des Raumes.</div>
+      <div className="p-10 text-red-600 text-lg">
+        Fehler beim Laden des Raumes.
+      </div>
     );
   }
 
   const room: Room = await res.json();
 
   return (
-    <div className="p-10 max-w-6xl mx-auto">
-      
-      <Link href="/rooms" className="text-slate-600 hover:underline mb-6 block">
-      ← Zurück zur Übersicht
+    <div className="p-4 md:p-10 max-w-6xl mx-auto">
+
+      {/* Zurück */}
+      <Link
+        href="/rooms"
+        className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 transition mb-6"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Zurück zur Übersicht
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-        {/* LEFT: Raumdetails */}
+        {/* ----------------------------- */}
+        {/* LEFT COLUMN — Raumdetails      */}
+        {/* ----------------------------- */}
         <div>
-          <div className="w-full h-72 relative mb-6 rounded-xl overflow-hidden shadow-md">
+
+          {/* Headerbild */}
+          <div className="w-full h-64 md:h-80 relative rounded-xl overflow-hidden shadow-sm border border-gray-200">
             <Image
               src={room.photo_url ?? "/fallback.jpg"}
-              alt="Raumbild"
+              alt={room.name}
               fill
               className="object-cover"
             />
           </div>
 
-          <h1 className="text-3xl font-bold">{room.name}</h1>
-          <p className="text-gray-700 mt-2">{room.location}</p>
+          {/* Titel */}
+          <h1 className="mt-8 text-4xl font-bold text-slate-900">
+            {room.name}
+          </h1>
 
-          <p className="text-gray-700 leading-relaxed mt-6">
-            {room.description}
-          </p>
+          {/* Ort */}
+          <div className="flex items-center gap-2 text-gray-600 mt-2">
+            <MapPin className="w-4 h-4" />
+            <span>{room.location}</span>
+          </div>
 
-          <h2 className="text-lg font-semibold mt-6">Kapazität</h2>
-          <p className="text-gray-700 mb-4">👤 {room.capacity} Personen</p>
+          {/* Beschreibung */}
+          <div className="mt-6 flex items-start gap-2 text-gray-700 leading-relaxed">
+            <Info className="w-5 h-5 text-indigo-600 mt-1" />
+            <p>{room.description}</p>
+          </div>
 
-          <h2 className="text-lg font-semibold mb-2">Ausstattung</h2>
+          {/* Kapazität */}
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold text-slate-900 mb-1">
+              Kapazität
+            </h2>
 
-          <div className="flex flex-wrap gap-2">
+            <div className="flex items-center gap-2 text-gray-700">
+              <Users className="w-5 h-5" />
+              <span>{room.capacity} Personen</span>
+            </div>
+          </div>
+
+          {/* Ausstattung */}
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold text-slate-900 mb-2">
+              Ausstattung
+            </h2>
+
             {room.features?.length > 0 ? (
-              room.features.map((item) => (
-                <span
-                  key={item}
-                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
-                >
-                  {item}
-                </span>
-              ))
+              <div className="flex flex-wrap gap-2">
+                {room.features.map((item) => (
+                  <span
+                    key={item}
+                    className="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full text-sm flex items-center gap-1"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    {item}
+                  </span>
+                ))}
+              </div>
             ) : (
-              <p className="text-gray-500">Keine Angaben</p>
+              <p className="text-gray-500 flex items-center gap-1">
+                <XCircle className="w-4 h-4" /> Keine Angaben
+              </p>
             )}
           </div>
         </div>
 
-        {/* RIGHT: Buchungsformular */}
-        <AvailabilityForm roomId={room.id} />
+        {/* ----------------------------- */}
+        {/* RIGHT COLUMN — BUCHUNGSFORM    */}
+        {/* ----------------------------- */}
+        <div className="lg:sticky lg:top-20 h-fit">
+          <div className="bg-white shadow-md border border-gray-200 rounded-xl p-6">
+            <h2 className="text-2xl font-semibold text-slate-900 mb-4">
+              Raum buchen
+            </h2>
+
+            <p className="text-gray-600 mb-6">
+              Wählen Sie Datum & Uhrzeit, um eine Buchung anzulegen.
+            </p>
+
+            <AvailabilityForm roomId={room.id} />
+          </div>
+        </div>
+
       </div>
     </div>
   );
