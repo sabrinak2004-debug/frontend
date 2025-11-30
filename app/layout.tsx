@@ -75,7 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // ---------------------------
   return (
     <html lang="de">
-      <body className="bg-[#f3f6ff]">
+      <body className="bg-[#f3f6ff] min-h-screen">
 
         {/* MOBILE HAMBURGER */}
         <button
