@@ -17,7 +17,13 @@ type Booking = {
 };
 
 export default function MyBookingsPage() {
-  const userId = getUserId();
+  const [userId, setUserId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const id = getUserId();
+    setUserId(id);
+  }, []);
+
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
