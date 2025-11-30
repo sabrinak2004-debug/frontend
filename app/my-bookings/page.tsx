@@ -1,6 +1,6 @@
 "use client";
 
-import { getUserId } from "@/lib/auth";
+import { getUserId, getToken } from "@/lib/auth";
 import { useEffect, useState, useCallback } from "react";
 import { API } from "@/lib/auth";
 
@@ -18,19 +18,22 @@ type Booking = {
 
 export default function MyBookingsPage() {
   const userId = getUserId();
-
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-  // Buchungen laden
   const loadBookings = useCallback(async () => {
     if (!userId) return;
 
     setLoading(true);
 
     try {
-      const res = await fetch(`${API}/bookings/me?userId=${userId}`, {
+      const token = getToken();
+
+      const res = await fetch(`${API}/bookings/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         cache: "no-store",
       });
 
@@ -46,19 +49,41 @@ export default function MyBookingsPage() {
   }, [userId]);
 
   useEffect(() => {
-    if (userId) {
-      loadBookings();
-    }
-  }, [userId, loadBookings]);
+    loadBookings();
+  }, [loadBookings]);
 
-  // Falls nicht eingeloggt
   if (!userId) {
     return (
-      <div className="p-10 text-red-600 text-xl">Du bist nicht eingeloggt.</div>
+      <div className="p-10 text-red-600 text-lg">
+        Du bist nicht eingeloggt.
+      </div>
     );
   }
 
-  // Hilfsfunktionen
+  const today = new Date();
+
+  const parse = (d: string) => new Date(d);
+
+  // -----------------------------
+  // Kategorien
+  // -----------------------------
+
+  const upcoming = bookings.filter(
+    (b) => b.status === "confirmed" && parse(b.date) >= today
+  );
+
+  const cancelled = bookings.filter((b) => b.status === "cancelled");
+
+  const past = bookings.filter(
+    (b) =>
+      b.status !== "cancelled" && // oder wenn du ALLE willst: einfach entfernen
+      parse(b.date) < today
+  );
+
+  // -----------------------------
+  // Formatierung
+  // -----------------------------
+
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("de-DE", {
       weekday: "long",
@@ -72,18 +97,6 @@ export default function MyBookingsPage() {
     return t.substring(0, 5);
   };
 
-  const now = new Date();
-
-  // Kategorien
-  const upcoming = bookings.filter(
-    (b) => new Date(b.date + "T" + b.starts_at) >= now && b.status !== "cancelled"
-  );
-  const expired = bookings.filter(
-    (b) => new Date(b.date + "T" + b.starts_at) < now && b.status !== "cancelled"
-  );
-  const cancelled = bookings.filter((b) => b.status === "cancelled");
-
-  // Buchung stornieren
   async function cancelBooking(id: string) {
     const res = await fetch(`${API}/bookings/${id}/cancel`, {
       method: "PATCH",
@@ -98,128 +111,85 @@ export default function MyBookingsPage() {
     loadBookings();
   }
 
-  // Komponente für einzelne Buchung
-  const BookingCard = (b: Booking) => (
-    <div
-      key={b.id}
-      className="bg-white rounded-2xl shadow-md border border-slate-200 p-6 flex justify-between items-center"
-    >
-      <div>
-        <h3 className="text-xl font-semibold text-slate-900">{b.rooms.name}</h3>
+  const renderList = (title: string, list: Booking[]) => {
+    if (list.length === 0) return null;
 
-        <div className="flex items-center gap-2 mt-3 text-slate-600">
-          <span>📆</span>
-          <span>{formatDate(b.date)}</span>
+    return (
+      <div className="mt-10">
+        <div className="flex items-center gap-3 mb-4">
+          <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
         </div>
 
-        <div className="flex items-center gap-2 mt-2 text-slate-600">
-          <span>⏰</span>
-          <span>
-            {formatTime(b.starts_at)} – {formatTime(b.ends_at)}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 mt-2 text-slate-600">
-          <span>👥</span>
-          <span>1 Personen</span>
-        </div>
-      </div>
-
-      <div className="flex flex-col items-end gap-3">
-        <span
-          className={`px-4 py-1 rounded-full text-sm font-semibold ${
-            b.status === "cancelled"
-              ? "bg-red-100 text-red-700"
-              : new Date(b.date + "T" + b.starts_at) < now
-              ? "bg-gray-200 text-gray-700"
-              : "bg-green-100 text-green-700"
-          }`}
-        >
-          {b.status === "cancelled"
-            ? "Storniert"
-            : new Date(b.date + "T" + b.starts_at) < now
-            ? "Abgelaufen"
-            : "Bestätigt"}
-        </span>
-
-        {b.status !== "cancelled" &&
-          new Date(b.date + "T" + b.starts_at) >= now && (
-            <button
-              onClick={() => cancelBooking(b.id)}
-              className="text-red-600 text-xl hover:text-red-800"
-              title="Buchung löschen"
+        <div className="space-y-6 max-w-3xl">
+          {list.map((b) => (
+            <div
+              key={b.id}
+              className="bg-white rounded-2xl shadow-md border border-slate-200 p-6 flex justify-between items-center"
             >
-              🗑️
-            </button>
-          )}
+              <div>
+                <h3 className="text-xl font-semibold text-slate-900">
+                  {b.rooms.name}
+                </h3>
+
+                <div className="flex items-center gap-2 mt-3 text-slate-600">
+                  <span>📆</span>
+                  <span>{formatDate(b.date)}</span>
+                </div>
+
+                <div className="flex items-center gap-2 mt-2 text-slate-600">
+                  <span>⏰</span>
+                  <span>
+                    {formatTime(b.starts_at)} – {formatTime(b.ends_at)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-end gap-3">
+                <span
+                  className={`px-4 py-1 rounded-full text-sm font-semibold ${
+                    b.status === "cancelled"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-green-100 text-green-700"
+                  }`}
+                >
+                  {b.status === "cancelled" ? "Storniert" : "Bestätigt"}
+                </span>
+
+                {b.status !== "cancelled" && (
+                  <button
+                    onClick={() => cancelBooking(b.id)}
+                    className="text-red-600 text-xl hover:text-red-800"
+                  >
+                    🗑️
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
-    <div className="p-10 max-w-4xl">
+    <div className="p-10">
       <h1 className="text-4xl font-bold text-slate-900">Meine Buchungen</h1>
-      <p className="text-slate-600 mt-2 mb-8">
-        Übersicht Ihrer gebuchten Gruppenräume in der Zentralbibliothek Hohenheim
+      <p className="text-slate-600 mt-2">
+        Übersicht Ihrer Gruppenraum-Buchungen
       </p>
 
-      {loading && <p className="text-slate-500">Wird geladen…</p>}
-      {message && <p className="mb-6 text-green-700 font-medium">{message}</p>}
+      {loading && <p className="mt-4">Wird geladen…</p>}
+      {message && <p className="mt-4 text-green-600">{message}</p>}
 
-      {/* 🔵 Kommende Buchungen */}
-      {upcoming.length > 0 && (
-        <>
-          <div className="flex items-center gap-3 mb-4 mt-10">
-            <div className="text-indigo-600 text-xl">📅</div>
-            <h2 className="text-2xl font-semibold text-slate-900">
-              Kommende Buchungen
-            </h2>
-          </div>
+      {renderList("Kommende Buchungen", upcoming)}
+      {renderList("Stornierte Buchungen", cancelled)}
+      {renderList("Vergangene Buchungen", past)}
 
-          <div className="space-y-6">
-            {upcoming.map((b) => BookingCard(b))}
-          </div>
-        </>
-      )}
-
-      {/* 🟠 Abgelaufene Buchungen */}
-      {expired.length > 0 && (
-        <>
-          <div className="flex items-center gap-3 mb-4 mt-12">
-            <div className="text-gray-600 text-xl">⏳</div>
-            <h2 className="text-2xl font-semibold text-slate-900">
-              Vergangene Buchungen
-            </h2>
-          </div>
-
-          <div className="space-y-6">
-            {expired.map((b) => BookingCard(b))}
-          </div>
-        </>
-      )}
-
-      {/* 🔴 Stornierte Buchungen */}
-      {cancelled.length > 0 && (
-        <>
-          <div className="flex items-center gap-3 mb-4 mt-12">
-            <div className="text-red-600 text-xl">❌</div>
-            <h2 className="text-2xl font-semibold text-slate-900">
-              Stornierte Buchungen
-            </h2>
-          </div>
-
-          <div className="space-y-6">
-            {cancelled.map((b) => BookingCard(b))}
-          </div>
-        </>
-      )}
-
-      {/* Keine Buchungen */}
       {!loading &&
-        bookings.length === 0 && (
-          <p className="text-slate-600 mt-6">
-            Du hast noch keine Buchungen.
-          </p>
+        upcoming.length === 0 &&
+        cancelled.length === 0 &&
+        past.length === 0 && (
+          <p className="mt-10 text-slate-600">Du hast noch keine Buchungen.</p>
         )}
     </div>
   );
