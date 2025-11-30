@@ -5,6 +5,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { isLoggedIn, getCurrentUser, logout } from "@/lib/auth";
+import {
+  BookOpen,
+  Home,
+  NotebookTabs,
+  Clock,
+  Phone,
+  User,
+  LogOut,
+} from "lucide-react";
 
 const PUBLIC_ROUTES = ["/", "/login", "/register"];
 
@@ -62,7 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   }
 
   // ---------------------------
-  // HAUPTLAYOUT MIT FIXED SIDEBAR
+  // HAUPTLAYOUT
   // ---------------------------
   return (
     <html lang="de">
@@ -95,6 +104,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             flex flex-col justify-between
             px-6 py-8
             transition-transform duration-300
+            shadow-sm
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
           `}
         >
@@ -102,7 +112,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div>
             {/* Logo */}
             <div className="flex items-center gap-3 mb-10">
-              <div className="p-3 rounded-2xl bg-blue-100 text-blue-600 text-3xl">📚</div>
+              <div className="p-3 rounded-2xl bg-blue-100 text-blue-600">
+                <BookOpen className="w-7 h-7" />
+              </div>
               <div>
                 <h1 className="text-lg font-semibold text-gray-900">Zentralbibliothek</h1>
                 <p className="text-sm text-gray-500">Universität Hohenheim</p>
@@ -115,20 +127,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 href="/rooms"
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-xl text-base
-                ${pathname === "/rooms" ? "bg-blue-50 text-blue-600" : "text-gray-700 hover:bg-gray-50"}
-              `}
+                  ${pathname === "/rooms"
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-700 hover:bg-gray-50"}
+                `}
               >
-                🏫 <span>Alle Räume</span>
+                <Home className="w-5 h-5" />
+                <span>Alle Räume</span>
               </Link>
 
               <Link
                 href="/my-bookings"
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-xl text-base
-                ${pathname === "/my-bookings" ? "bg-blue-50 text-blue-600" : "text-gray-700 hover:bg-gray-50"}
-              `}
+                  ${pathname === "/my-bookings"
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-700 hover:bg-gray-50"}
+                `}
               >
-                🗒 <span>Meine Buchungen</span>
+                <NotebookTabs className="w-5 h-5" />
+                <span>Meine Buchungen</span>
               </Link>
             </nav>
 
@@ -138,18 +156,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
               <div className="mb-4">
                 <div className="flex items-center gap-2 text-gray-700 font-medium">
-                  🕒 <span>Ausleihe & Räume</span>
+                  <Clock className="w-4 h-4" />
+                  <span>Ausleihe & Räume</span>
                 </div>
-                <p className="text-sm text-gray-500 ml-7 mt-1">
+                <p className="text-sm text-gray-500 ml-6 mt-1">
                   Mo–Fr: 08–21 <br /> Sa–So: 10–21
                 </p>
               </div>
 
               <div className="mb-4">
                 <div className="flex items-center gap-2 text-gray-700 font-medium">
-                  📞 <span>Auskunft</span>
+                  <Phone className="w-4 h-4" />
+                  <span>Auskunft</span>
                 </div>
-                <p className="text-sm text-gray-500 ml-7 mt-1">
+                <p className="text-sm text-gray-500 ml-6 mt-1">
                   Mo–Fr: 09–17 <br /> Tel.: 0711 / 459-22096
                 </p>
               </div>
@@ -158,11 +178,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
 
-          {/* USER UNTEN – FIXED POSITION */}
+          {/* USER UNTEN */}
           <div className="pt-4 border-t border-gray-200 mt-8">
             {user ? (
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-xl text-3xl">👤</div>
+                <div className="p-2 bg-blue-100 rounded-xl">
+                  <User className="w-6 h-6 text-blue-600" />
+                </div>
                 <div>
                   <p className="font-medium text-gray-800">{user.displayName}</p>
                   <p className="text-sm text-gray-500">{user.email}</p>
@@ -174,8 +196,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
             <button
               onClick={handleLogout}
-              className="mt-3 text-sm text-red-600 hover:underline"
+              className="mt-3 flex items-center gap-2 text-sm text-red-600 hover:underline"
             >
+              <LogOut className="w-4 h-4" />
               Abmelden
             </button>
           </div>
