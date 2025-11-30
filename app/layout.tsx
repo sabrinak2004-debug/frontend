@@ -182,7 +182,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="pt-4 border-t border-gray-200 mt-8">
             {user ? (
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xs bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg">
+                <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-md">
                   <User className="w-6 h-6 text-white" />
                 </div>
                 <div>
