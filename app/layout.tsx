@@ -202,7 +202,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               Abmelden
             </button>
           </div>
-        </aside>
         <footer className="text-center text-sm text-gray-500 p-4">
         <a href="/datenschutz" className="underline mr-4">
           Datenschutz
@@ -211,6 +210,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Impressum
         </a>
       </footer>
+        </aside>
 
 
         {/* MAIN CONTENT – SCROLLBAR */}
