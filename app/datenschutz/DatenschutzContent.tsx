@@ -39,6 +39,16 @@ export default function DatenschutzPage() {
         Einschränkung der Verarbeitung ihrer personenbezogenen Daten gemäß DSGVO.
       </p>
 
+      <h2 className="text-xl font-semibold mt-6 mb-2">
+        Cookies / Session
+      </h2>
+      <p className="mb-4">
+        Die Anwendung verwendet technisch notwendige Cookies bzw. Session-Informationen,
+        die für die Authentifizierung und den sicheren Betrieb der Plattform erforderlich
+        sind. Diese Cookies sind notwendig, um den Login-Status aufrechtzuerhalten und
+        die Nutzung der Anwendung zu ermöglichen. <br>Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.</br>
+      </p>
+
       <p className="mt-8 text-sm text-gray-500">
         Stand: {new Date().toLocaleDateString("de-DE")}
       </p>
