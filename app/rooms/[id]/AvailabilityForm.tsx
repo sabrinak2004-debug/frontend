@@ -10,6 +10,7 @@ import {
   FileText,
   CheckCircle2,
   AlertCircle,
+  Info,
 } from "lucide-react";
 
 type Slot = { start: string; end: string };
@@ -64,14 +65,12 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
     setStart("");
     setEnd("");
 
-    // freie Slots abrufen
     const freeRes = await fetch(
       `${API}/rooms/${roomId}/availability?date=${date}`
     );
     const freeData = await freeRes.json();
     setSlots(freeData.free || []);
 
-    // bereits gebuchte Slots abrufen
     const bookedRes = await fetch(
       `${API}/bookings/by-room-and-date?roomId=${roomId}&date=${date}`
     );
@@ -140,7 +139,6 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
     loadAvailability();
   }
 
-  // Styles
   const inputCls =
     "w-full h-12 rounded-xl border border-slate-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500";
   const labelCls = "text-sm font-semibold text-slate-800 flex items-center gap-2";
@@ -191,6 +189,23 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
       >
         Verfügbarkeit prüfen
       </button>
+
+      {/* INFOBOX: BUCHUNGSREGELN */}
+      {slots.length > 0 && (
+        <div className="mt-6 p-5 rounded-2xl bg-slate-50 border border-slate-200">
+          <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+            <Info className="w-4 h-4 text-slate-700" />
+            Hinweise zur Buchung (Fair-Use)
+          </h3>
+          <ul className="mt-3 text-slate-700 space-y-1 text-sm list-disc pl-5">
+            <li>Buchungen sind nur für einen begrenzten Zeitraum im Voraus möglich.</li>
+            <li>Pro Person ist nur eine begrenzte Anzahl aktiver Buchungen erlaubt.</li>
+            <li>Bitte storniert eure Buchung, wenn ihr den Raum nicht nutzen könnt.</li>
+            <li>Der Raum ist pünktlich zu verlassen und ordentlich zu hinterlassen.</li>
+            <li>Eine Buchung hat eine Maximaldauer von 3 Stunden</li>
+          </ul>
+        </div>
+      )}
 
       {/* START & END ZEIT */}
       {slots.length > 0 && (
@@ -243,7 +258,6 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
             <Users className="w-4 h-4" />
             Anzahl Personen
           </label>
-
           <input
             type="number"
             min={1}
@@ -261,7 +275,6 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
             <FileText className="w-4 h-4" />
             Zweck (optional)
           </label>
-
           <textarea
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
@@ -286,9 +299,8 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
         <div className="mt-8 p-5 rounded-2xl bg-indigo-50 border border-indigo-200">
           <h3 className="font-semibold text-slate-900 flex items-center gap-2">
             <Clock className="w-4 h-4 text-indigo-700" />
-            Bereits belegt am {date}:
+            Belegte Zeiten am {date}:
           </h3>
-
           <ul className="mt-3 text-slate-700 space-y-1">
             {roomBookings.map((b, i) => (
               <li key={i}>
