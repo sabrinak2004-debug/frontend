@@ -198,8 +198,8 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
             Hinweise zur Buchung (Fair-Use)
           </h3>
           <ul className="mt-3 text-slate-700 space-y-1 text-sm list-disc pl-5">
-            <li>Buchungen sind nur für einen begrenzten Zeitraum im Voraus möglich.</li>
-            <li>Pro Person ist nur eine begrenzte Anzahl aktiver Buchungen erlaubt.</li>
+            <li>Buchungen sind nur für 14 Tage im Voraus möglich.</li>
+            <li>Pro Person sind nur 3 aktive Buchungen erlaubt.</li>
             <li>Bitte storniert eure Buchung, wenn ihr den Raum nicht nutzen könnt.</li>
             <li>Der Raum ist pünktlich zu verlassen und ordentlich zu hinterlassen.</li>
             <li>Eine Buchung hat eine Maximaldauer von 3 Stunden</li>
