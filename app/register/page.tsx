@@ -24,6 +24,9 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 🔹 NEU: State für Datenschutz-Popup
+  const [showPrivacy, setShowPrivacy] = useState(false);
+
   async function handleRegister() {
     setError("");
     setLoading(true);
@@ -133,25 +136,96 @@ export default function RegisterPage() {
         >
           {loading ? "Wird erstellt…" : "Registrieren"}
         </button>
+
+        {/* DATENSCHUTZHINWEIS + POPUP-TRIGGER */}
         <p className="text-sm text-gray-500 mt-4">
           Mit der Registrierung erkläre ich mich mit der Verarbeitung meiner
           personenbezogenen Daten zum Zweck der Raumbuchung einverstanden.
           Weitere Informationen finde ich in der{" "}
-          <a
-            href="/register/datenschutz"
+          <button
+            type="button"
+            onClick={() => setShowPrivacy(true)}
             className="underline hover:text-gray-700"
           >
             Datenschutzerklärung
-          </a>.
+          </button>.
         </p>
 
-
-        {/* LINK */}
+        {/* LINK LOGIN */}
         <p className="text-center mt-6 text-sm text-slate-600">
           Schon ein Konto?{" "}
-          <a href="/login" className="text-indigo-600 font-semibold hover:underline">
+          <a
+            href="/login"
+            className="text-indigo-600 font-semibold hover:underline"
+          >
             Jetzt einloggen →
           </a>
+        </p>
+      </div>
+
+      {/* 🔽 DATENSCHUTZ MODAL */}
+      {showPrivacy && (
+        <DatenschutzModal onClose={() => setShowPrivacy(false)} />
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
+   DATENSCHUTZ MODAL
+   ============================================================ */
+function DatenschutzModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+      <div className="bg-white max-w-3xl w-full max-h-[80vh] overflow-y-auto rounded-2xl p-6 relative">
+
+        {/* CLOSE */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-slate-500 hover:text-slate-800"
+        >
+          ✕
+        </button>
+
+        <h2 className="text-2xl font-bold mb-4">Datenschutzerklärung</h2>
+
+     <p className="mb-4">
+        Verantwortlich für die Datenverarbeitung auf dieser Website ist:
+      </p>
+
+        <p className="mb-4">
+          <strong>Sabrina Klausmeier</strong><br />
+          E-Mail: sabrinak2004@gmx.de
+        </p>
+
+        <h2 className="text-xl font-semibold mt-6 mb-2">
+          Zweck der Datenverarbeitung
+        </h2>
+        <p className="mb-4">
+          Diese Webanwendung dient der Buchung von Gruppenarbeitsräumen für
+          Studierende der Universität Hohenheim.
+        </p>
+
+        <h2 className="text-xl font-semibold mt-6 mb-2">
+          Verarbeitete Daten
+        </h2>
+        <ul className="list-disc ml-6 mb-4">
+          <li>Benutzername</li>
+          <li>Universitäts-E-Mail-Adresse</li>
+          <li>Passwort (verschlüsselt / gehasht)</li>
+          <li>Rolle (z. B. Student oder Administrator)</li>
+          <li>Buchungsdaten (Raum, Datum, Uhrzeit, Status)</li>
+        </ul>
+
+        <h2 className="text-xl font-semibold mt-6 mb-2">
+          Rechte der betroffenen Personen
+        </h2>
+        <p className="mb-4">
+          Nutzer haben das Recht auf Auskunft, Berichtigung, Löschung sowie
+          Einschränkung der Verarbeitung ihrer personenbezogenen Daten gemäß DSGVO.
+        </p>
+        <p className="text-sm text-slate-500 mt-6">
+          Stand: {new Date().toLocaleDateString("de-DE")}
         </p>
       </div>
     </div>
