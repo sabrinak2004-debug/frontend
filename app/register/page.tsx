@@ -138,7 +138,7 @@ export default function RegisterPage() {
           personenbezogenen Daten zum Zweck der Raumbuchung einverstanden.
           Weitere Informationen finde ich in der{" "}
           <a
-            href="/datenschutz_register"
+            href="/register/datenschutz"
             className="underline hover:text-gray-700"
             target="_blank"
             rel="noopener noreferrer"
