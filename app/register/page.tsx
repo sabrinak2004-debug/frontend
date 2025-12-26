@@ -133,6 +133,20 @@ export default function RegisterPage() {
         >
           {loading ? "Wird erstellt…" : "Registrieren"}
         </button>
+        <p className="text-sm text-gray-500 mt-4">
+          Mit der Registrierung erkläre ich mich mit der Verarbeitung meiner
+          personenbezogenen Daten zum Zweck der Raumbuchung einverstanden.
+          Weitere Informationen finde ich in der{" "}
+          <a
+            href="/datenschutz"
+            className="underline hover:text-gray-700"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Datenschutzerklärung
+          </a>.
+        </p>
+
 
         {/* LINK */}
         <p className="text-center mt-6 text-sm text-slate-600">
