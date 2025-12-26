@@ -15,7 +15,14 @@ import {
   LogOut,
 } from "lucide-react";
 
-const PUBLIC_ROUTES = ["/", "/login", "/register"];
+const PUBLIC_ROUTES = [
+  "/login",
+  "/register",
+  "/datenschutz",
+  "/register/datenschutz",
+  "/impressum"
+];
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
