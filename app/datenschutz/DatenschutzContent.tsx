@@ -47,7 +47,8 @@ export default function DatenschutzPage() {
         die für die Authentifizierung und den sicheren Betrieb der Plattform erforderlich
         sind. Diese Cookies sind notwendig, um den Login-Status aufrechtzuerhalten und
         die Nutzung der Anwendung zu ermöglichen. 
-        <br>Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.</br>
+        
+        Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
       </p>
 
       <p className="mt-8 text-sm text-gray-500">
