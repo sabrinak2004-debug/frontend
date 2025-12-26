@@ -221,3 +221,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+        <footer className="text-center text-sm text-gray-500 p-4">
+        <a href="/datenschutz" className="underline mr-4">
+          Datenschutz
+        </a>
+        <a href="/impressum" className="underline">
+          Impressum
+        </a>
+      </footer>
