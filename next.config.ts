@@ -1,13 +1,11 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  trailingSlash: true,       // ✅ verhindert Routing-Probleme
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "kim.uni-hohenheim.de",
-      },
-    ],
+    unoptimized: true,       // ✅ wichtig, wenn du next/image nutzt
   },
 };
 
 export default nextConfig;
+
