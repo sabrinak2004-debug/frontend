@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Hohenheim Booking</string>
+    <string name="title_activity_main">Hohenheim Booking</string>
+    <string name="package_name">de.unihohenheim.booking</string>
+    <string name="custom_url_scheme">de.unihohenheim.booking</string>
+</resources>
