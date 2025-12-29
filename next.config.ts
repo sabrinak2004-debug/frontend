@@ -1,11 +1,16 @@
 import type { NextConfig } from "next";
+import withPWAInit from "next-pwa";
+
+const withPWA = withPWAInit({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true,
+  skipWaiting: true,
+});
 
 const nextConfig: NextConfig = {
-  trailingSlash: true,       // ✅ verhindert Routing-Probleme
-  images: {
-    unoptimized: true,       // ✅ wichtig, wenn du next/image nutzt
-  },
+  trailingSlash: true,
+  images: { unoptimized: true },
 };
 
-export default nextConfig;
-
+export default withPWA(nextConfig);
