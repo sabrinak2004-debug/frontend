@@ -194,7 +194,7 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
       {slots.length > 0 && (
         <div className="mt-6 p-5 rounded-2xl bg-slate-50 border border-slate-200 ">
           <h3 className="font-semibold text-slate-900 flex items-center gap-2">
-            <Info className="w-4 h-4 text-slate-700 " />
+            <Info className="w-4 h-4 text-red-700 " />
             Hinweise zur Buchung (Fair-Use)
           </h3>
           <ul className="mt-3 text-slate-700 space-y-1 text-sm list-disc pl-5">
@@ -304,7 +304,6 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
           <ul className="mt-3 text-slate-700 space-y-1">
             {roomBookings.map((b, i) => (
               <li key={i}>
-                <Clock className="w-4 h-4 inline-block mr-1" />
                 {b.start} – {b.end} Uhr
               </li>
             ))}
