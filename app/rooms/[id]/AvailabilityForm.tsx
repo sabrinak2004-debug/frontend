@@ -304,7 +304,8 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
           <ul className="mt-3 text-slate-700 space-y-1">
             {roomBookings.map((b, i) => (
               <li key={i}>
-                ⏰ {b.start} – {b.end} Uhr
+                <Clock className="w-4 h-4 inline-block mr-1" />
+                {b.start} – {b.end} Uhr
               </li>
             ))}
           </ul>
