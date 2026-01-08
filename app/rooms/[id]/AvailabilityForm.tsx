@@ -298,7 +298,7 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
       {roomBookings.length > 0 && (
         <div className="mt-8 p-5 rounded-2xl bg-indigo-50 border border-indigo-200">
           <h3 className="font-semibold text-slate-900 flex items-center gap-2">
-            <CheckCircle2 className="w-6 h-6 text-indigo-700" />
+            <CheckCircle2 className="w-6 h-6 text-red-700" />
             Buchung bestätigt am {date}:
           </h3>
           <ul className="mt-3 text-slate-700 space-y-1">
