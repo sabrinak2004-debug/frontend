@@ -299,8 +299,15 @@ export default function AvailabilityForm({ roomId }: { roomId: string }) {
         <div className="mt-8 p-5 rounded-2xl bg-indigo-50 border border-indigo-200">
           <h3 className="font-semibold text-slate-900 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-indigo-700" />
-            Buchung vorgenommen:
+            Buchung bestätigt am {date}:
           </h3>
+          <ul className="mt-3 text-slate-700 space-y-1">
+            {roomBookings.map((b, i) => (
+              <li key={i}>
+                ⏰ {b.start} – {b.end} Uhr
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
