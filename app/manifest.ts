@@ -7,7 +7,6 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Raumbuchung für Gruppenarbeitsräume in der Zentralbibliothek der Uni Hohenheim",
     start_url: "/",
     display: "standalone",
-    background_color: "#ffffff",
     theme_color: "#1e88e5",
     icons: [
       { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
