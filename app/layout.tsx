@@ -23,11 +23,17 @@ const PUBLIC_ROUTES = [
   "/impressum"
 ];
 
+function isPublicRoute(pathname: string) {
+  return PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
+  );
+}
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const isAuthPage = PUBLIC_ROUTES.includes(pathname);
+  const isAuthPage = isPublicRoute(pathname);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState<{ displayName: string; email: string } | null>(null);
@@ -36,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // AUTH REDIRECT
   // ---------------------------
   const checkAuth = useCallback(() => {
-    if (!PUBLIC_ROUTES.includes(pathname) && !isLoggedIn()) {
+    if (!isPublicRoute(pathname) && !isLoggedIn()) {
       router.replace("/login");
     }
   }, [pathname, router]);
@@ -50,7 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // ---------------------------
   useEffect(() => {
     async function loadUser() {
-      if (!PUBLIC_ROUTES.includes(pathname) && isLoggedIn()) {
+      if (!isPublicRoute(pathname) && isLoggedIn()) {
         const u = await getCurrentUser();
         setUser(u);
       }
